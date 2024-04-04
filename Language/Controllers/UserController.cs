@@ -26,7 +26,7 @@ namespace Language.Controllers
         }
 
         [HttpGet("GetById")]
-        public IActionResult Get(int id) // Ubah parameter menjadi int
+        public IActionResult Get(Guid id) // Ubah parameter menjadi int
         {
             User? user = _userData.GetById(id); // Panggil GetById dengan parameter int
 
@@ -47,7 +47,7 @@ namespace Language.Controllers
 
             User user = new User
             {
-                // user_id tidak perlu diisi di sini karena akan diisi oleh database
+                user_id = Guid.NewGuid(),
                 email = userDto.email,
                 password = userDto.password,
                 address = userDto.address,
@@ -68,7 +68,7 @@ namespace Language.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(int id, [FromBody] UserDTO userDto) // Ubah parameter menjadi int
+        public IActionResult Put(Guid id, [FromBody] UserDTO userDto) // Ubah parameter menjadi int
         {
 
             if (userDto == null)
@@ -76,7 +76,7 @@ namespace Language.Controllers
 
             User user = new User
             {
-                // user_id tidak perlu diisi di sini karena akan diisi oleh parameter int id
+                user_id = Guid.NewGuid(),
                 email = userDto.email,
                 password = userDto.password,
                 address = userDto.address,
@@ -97,7 +97,7 @@ namespace Language.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id) // Ubah parameter menjadi int
+        public IActionResult Delete(Guid id) // Ubah parameter menjadi int
         {
             bool result = _userData.Delete(id);
 
