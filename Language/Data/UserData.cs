@@ -26,7 +26,7 @@ namespace Language.Data
                             {
                                 user_id = reader.GetInt32(reader.GetOrdinal("user_id")),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["password"].ToString(),
+                                password = reader["password"].ToString() ?? string.Empty,
                                 address = reader["address"].ToString() ?? string.Empty,
                                 phone_number = reader["phone_number"].ToString() ?? string.Empty,
                             });
@@ -68,7 +68,7 @@ namespace Language.Data
                             {
                                 user_id = reader.GetInt32(reader.GetOrdinal("user_id")),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["password"].ToString(),
+                                password = reader["password"].ToString() ?? string.Empty,
                                 address = reader["address"].ToString() ?? string.Empty,
                                 phone_number = reader["phone_number"].ToString() ?? string.Empty,
                             };
@@ -88,7 +88,7 @@ namespace Language.Data
             bool result = false;
 
 
-            string query = $"INSERT INTO user(user_id, email, password, address, phone_number) " + $"VALUES ('{user.user_id}', '{user.email}', '{user.password}', '{user.address}', '{user.phone_number}')";
+            string query = $"INSERT INTO user(email, password, address, phone_number) " + $"VALUES ('{user.email}', '{user.password}', '{user.address}', '{user.phone_number}')";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -116,7 +116,7 @@ namespace Language.Data
             bool result = false;
 
 
-            string query = $"UPDATE user SET email = '{user.email}', password = '{user.password}', address = '{user.address}', phone_number = '{user.phone_number}' " + $"WHERE user_id = '{id}'";
+            string query = $"UPDATE user SET email = '{user.email}', password = '{user.password}', address = '{user.address}', phone_number = '{user.phone_number}' WHERE user_id = '{id}'";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
