@@ -1,4 +1,4 @@
-﻿namespace Language.DTOs
+﻿namespace Language.DTOs.User
 {
     public class UserDTO
     {

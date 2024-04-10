@@ -25,25 +25,31 @@ namespace Language.Data
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    connection.Open();
+                    try { 
+                        connection.Open();
 
-                    using (MySqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
+                        using (MySqlDataReader reader = command.ExecuteReader())
                         {
-                            books.Add(new User
+                            while (reader.Read())
                             {
-                                user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
-                                email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["password"].ToString() ?? string.Empty,
-                                address = reader["address"].ToString() ?? string.Empty,
-                                phone_number = reader["phone_number"].ToString() ?? string.Empty,
-                            });
+                                books.Add(new User
+                                {
+                                    user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
+                                    email = reader["email"].ToString() ?? string.Empty,
+                                    password = reader["password"].ToString() ?? string.Empty,
+                                    address = reader["address"].ToString() ?? string.Empty,
+                                    phone_number = reader["phone_number"].ToString() ?? string.Empty,
+                                });
+                            }
                         }
                     }
-
+                    catch
+                    {
+                        throw;
+                    }
+                    finally { 
                     connection.Close();
-
+                    }
                 }
 
             }

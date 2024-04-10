@@ -1,5 +1,5 @@
 ﻿using Language.Data;
-using Language.DTOs;
+using Language.DTOs.User;
 using Language.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -21,14 +21,21 @@ namespace Language.Controllers
         [HttpGet("GetAll")]
         public IActionResult GetAll()
         {
-            List<User> users = _userData.GetAll();
-            return Ok(users);
+            try
+            {
+                List<User> users = _userData.GetAll();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("GetById")]
-        public IActionResult Get(Guid id) // Ubah parameter menjadi int
+        public IActionResult Get(Guid id)
         {
-            User? user = _userData.GetById(id); // Panggil GetById dengan parameter int
+            User? user = _userData.GetById(id);
 
             if (user == null)
             {
@@ -58,7 +65,7 @@ namespace Language.Controllers
 
             if (result)
             {
-                return StatusCode(201, user.user_id); // user_id sudah berupa int
+                return StatusCode(201, user.user_id);
             }
             else
             {
@@ -97,7 +104,7 @@ namespace Language.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete(Guid id) // Ubah parameter menjadi int
+        public IActionResult Delete(Guid id)
         {
             bool result = _userData.Delete(id);
 
