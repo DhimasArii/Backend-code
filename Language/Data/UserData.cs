@@ -5,13 +5,22 @@ namespace Language.Data
 {
     public class UserData
     {
-        private readonly string connectionString = "server=localhost;port=3306;database=language;user=root;password=";
+        private readonly IConfiguration _configuration;
+        private readonly string connectionString;
+        public UserData(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            connectionString = _configuration.GetConnectionString("DefaultConnection");
+        }
+
+
+        //private readonly string connectionString = "server=localhost;port=3306;database=language;user=root;password=";
 
         //SelectAll
         public List<User> GetAll()
         {
-            List<User> books = new List<User>();
-            string query = "SELECT * FROM user";
+            List<User> users = new List<User>();
+            string query = "SELECT * FROM users";
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -22,11 +31,11 @@ namespace Language.Data
                     {
                         while (reader.Read())
                         {
-                            books.Add(new User
+                            users.Add(new User
                             {
-                                user_id = reader.GetInt32(reader.GetOrdinal("user_id")),
+                                user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["password"].ToString(),
+                                password = reader["passwords"].ToString() ?? string.Empty,
                                 address = reader["address"].ToString() ?? string.Empty,
                                 phone_number = reader["phone_number"].ToString() ?? string.Empty,
                             });
@@ -39,22 +48,25 @@ namespace Language.Data
 
             }
 
-            return books;
+            return users;
 
         }
 
         //Select By Primary Key
-        public User? GetById(int id)
+        public User? GetById(Guid id)
         {
             User? user = null;
 
-            string query = $"SELECT * FROM user WHERE user_id = '{id}'";
+            string query = $"SELECT * FROM users WHERE user_id = @id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
+
+                    command.Parameters.Clear();
+                    command.Parameters.AddWithValue("@id", id);
 
                     connection.Open();
 
@@ -66,9 +78,9 @@ namespace Language.Data
                         {
                             user = new User
                             {
-                                user_id = reader.GetInt32(reader.GetOrdinal("user_id")),
+                                user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["password"].ToString(),
+                                password = reader["passwords"].ToString() ?? string.Empty,
                                 address = reader["address"].ToString() ?? string.Empty,
                                 phone_number = reader["phone_number"].ToString() ?? string.Empty,
                             };
@@ -88,13 +100,19 @@ namespace Language.Data
             bool result = false;
 
 
-            string query = $"INSERT INTO user(user_id, email, password, address, phone_number) " + $"VALUES ('{user.user_id}', '{user.email}', '{user.password}', '{user.address}', '{user.phone_number}')";
+            string query = $"INSERT INTO users(user_id, email, passwords, address, phone_number) " + $"VALUES (@user_id, @email, @password, @address, @phone_number)";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
+                    command.Parameters.AddWithValue("@user_id", user.user_id);
+                    command.Parameters.AddWithValue("@email", user.email);
+                    command.Parameters.AddWithValue("@password", user.password);
+                    command.Parameters.AddWithValue("@address", user.address);
+                    command.Parameters.AddWithValue("@phone_number", user.phone_number);
+
                     command.Connection = connection;
                     command.CommandText = query;
 
@@ -111,18 +129,24 @@ namespace Language.Data
         }
 
         //Update
-        public bool Update(int id, User user)
+        public bool Update(Guid id, User user)
         {
             bool result = false;
 
 
-            string query = $"UPDATE user SET email = '{user.email}', password = '{user.password}', address = '{user.address}', phone_number = '{user.phone_number}' " + $"WHERE user_id = '{id}'";
+            string query = $"UPDATE users SET email = @email, passwords = @password, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
+                    command.Parameters.AddWithValue("@user_id", id);
+                    command.Parameters.AddWithValue("@email", user.email);
+                    command.Parameters.AddWithValue("@password", user.password);
+                    command.Parameters.AddWithValue("@address", user.address);
+                    command.Parameters.AddWithValue("@phone_number", user.phone_number);
+
                     command.Connection = connection;
                     command.CommandText = query;
 
@@ -138,16 +162,19 @@ namespace Language.Data
         }
 
         // Delete
-        public bool Delete(int id)
+        public bool Delete(Guid id)
         {
             bool result = false;
 
-            string query = $"DELETE FROM user WHERE user_id = '{id}'";
+            string query = $"DELETE FROM users WHERE user_id = @user_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
+                    command.Parameters.Clear();
+                    command.Parameters.AddWithValue("@user_id", id);
+
                     command.Connection = connection;
                     command.CommandText = query;
 
