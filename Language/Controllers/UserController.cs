@@ -34,6 +34,7 @@ namespace Language.Controllers
 
         [HttpGet("GetById")]
         public IActionResult Get(Guid id)
+
         {
             User? user = _userData.GetById(id);
 

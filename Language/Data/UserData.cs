@@ -19,8 +19,8 @@ namespace Language.Data
         //SelectAll
         public List<User> GetAll()
         {
-            List<User> books = new List<User>();
-            string query = "SELECT * FROM user";
+            List<User> users = new List<User>();
+            string query = "SELECT * FROM users";
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -36,7 +36,7 @@ namespace Language.Data
                                 {
                                     user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                     email = reader["email"].ToString() ?? string.Empty,
-                                    password = reader["password"].ToString() ?? string.Empty,
+                                    password = reader["passwords"].ToString() ?? string.Empty,
                                     address = reader["address"].ToString() ?? string.Empty,
                                     phone_number = reader["phone_number"].ToString() ?? string.Empty,
                                 });
@@ -54,7 +54,7 @@ namespace Language.Data
 
             }
 
-            return books;
+            return users;
 
         }
 
@@ -63,7 +63,8 @@ namespace Language.Data
         {
             User? user = null;
 
-            string query = $"SELECT * FROM user WHERE user_id = @id";
+
+            string query = $"SELECT * FROM users WHERE user_id = @id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -86,7 +87,8 @@ namespace Language.Data
                             {
                                 user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["password"].ToString() ?? string.Empty,
+
+                                password = reader["passwords"].ToString() ?? string.Empty,
                                 address = reader["address"].ToString() ?? string.Empty,
                                 phone_number = reader["phone_number"].ToString() ?? string.Empty,
                             };
@@ -106,7 +108,9 @@ namespace Language.Data
             bool result = false;
 
 
-            string query = $"INSERT INTO user(user_id, email, password, address, phone_number) " + $"VALUES (@user_id, @email, @password, @address, @phone_number)";
+
+            string query = $"INSERT INTO users(user_id, email, passwords, address, phone_number) " + $"VALUES (@user_id, @email, @password, @address, @phone_number)";
+
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -140,7 +144,9 @@ namespace Language.Data
             bool result = false;
 
 
-            string query = $"UPDATE user SET email = @email, password = @password, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
+
+            string query = $"UPDATE users SET email = @email, passwords = @password, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
+
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -172,7 +178,8 @@ namespace Language.Data
         {
             bool result = false;
 
-            string query = $"DELETE FROM user WHERE user_id = @user_id";
+            string query = $"DELETE FROM users WHERE user_id = @user_id";
+
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
