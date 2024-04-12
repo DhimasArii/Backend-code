@@ -32,7 +32,7 @@ namespace Language.Data
                         {
                             while (reader.Read())
                             {
-                                books.Add(new User
+                                users.Add(new User
                                 {
                                     user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                     email = reader["email"].ToString() ?? string.Empty,
