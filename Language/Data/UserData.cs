@@ -25,25 +25,31 @@ namespace Language.Data
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    connection.Open();
+                    try { 
+                        connection.Open();
 
-                    using (MySqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
+                        using (MySqlDataReader reader = command.ExecuteReader())
                         {
-                            users.Add(new User
+                            while (reader.Read())
                             {
-                                user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
-                                email = reader["email"].ToString() ?? string.Empty,
-                                password = reader["passwords"].ToString() ?? string.Empty,
-                                address = reader["address"].ToString() ?? string.Empty,
-                                phone_number = reader["phone_number"].ToString() ?? string.Empty,
-                            });
+                                books.Add(new User
+                                {
+                                    user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
+                                    email = reader["email"].ToString() ?? string.Empty,
+                                    password = reader["passwords"].ToString() ?? string.Empty,
+                                    address = reader["address"].ToString() ?? string.Empty,
+                                    phone_number = reader["phone_number"].ToString() ?? string.Empty,
+                                });
+                            }
                         }
                     }
-
+                    catch
+                    {
+                        throw;
+                    }
+                    finally { 
                     connection.Close();
-
+                    }
                 }
 
             }
@@ -56,6 +62,7 @@ namespace Language.Data
         public User? GetById(Guid id)
         {
             User? user = null;
+
 
             string query = $"SELECT * FROM users WHERE user_id = @id";
 
@@ -80,6 +87,7 @@ namespace Language.Data
                             {
                                 user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
+
                                 password = reader["passwords"].ToString() ?? string.Empty,
                                 address = reader["address"].ToString() ?? string.Empty,
                                 phone_number = reader["phone_number"].ToString() ?? string.Empty,
@@ -100,7 +108,9 @@ namespace Language.Data
             bool result = false;
 
 
+
             string query = $"INSERT INTO users(user_id, email, passwords, address, phone_number) " + $"VALUES (@user_id, @email, @password, @address, @phone_number)";
+
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -134,7 +144,9 @@ namespace Language.Data
             bool result = false;
 
 
+
             string query = $"UPDATE users SET email = @email, passwords = @password, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
+
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -167,6 +179,7 @@ namespace Language.Data
             bool result = false;
 
             string query = $"DELETE FROM users WHERE user_id = @user_id";
+
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
