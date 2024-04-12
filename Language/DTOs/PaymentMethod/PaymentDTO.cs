@@ -1,6 +1,6 @@
-﻿namespace Language.DTOs.Payment_Method
+﻿namespace Language.DTOs.PaymentMethod
 {
-    public class Payment
+    public class PaymentDTO
     {
         public string payment_name {  get; set; }
         public string payment_status { get; set;}

@@ -6,6 +6,5 @@
         public Guid user_id { get; set; }
         public Guid course_id { get; set; }
 
-        public ICollection<User> users { get; set; }
     }
 }

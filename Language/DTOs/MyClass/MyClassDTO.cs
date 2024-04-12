@@ -1,4 +1,4 @@
-﻿namespace Language.DTOs.My_Class
+﻿namespace Language.DTOs.MyClass
 {
     public class MyClassDTO
     {

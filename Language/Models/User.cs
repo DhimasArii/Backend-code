@@ -9,8 +9,7 @@ namespace Language.Models
         public string address { get; set; }
         public string phone_number { get; set; }
 
-        public ICollection<Checkout> checkout { get;}
-        public ICollection<User> users { get;}
+        
 
 
 
