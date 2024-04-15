@@ -19,9 +19,9 @@ namespace Language.Data
         //private readonly string connectionString = "server=localhost;port=3306;database=language;user=root;password=";
 
         //SelectAll
-        public List<CheckoutDTO> GetAll()
+        public List<Checkout> GetAll()
         {
-            List<CheckoutDTO> checkouts = new List<CheckoutDTO>();
+            List<Checkout> checkouts = new List<Checkout>();
 
             string query = @"
         SELECT
@@ -55,18 +55,18 @@ namespace Language.Data
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        CheckoutDTO currentCheckout = null;
+                        Checkout currentCheckout = null;
 
                         while (reader.Read())
                         {
                             if (currentCheckout == null || currentCheckout.checkout_id != Guid.Parse(reader["checkout_id"].ToString()))
                             {
-                                currentCheckout = new CheckoutDTO
+                                currentCheckout = new Checkout
                                 {
                                     checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
                                     id_payment_method = Guid.Parse(reader["id_payment_method"].ToString()),
-                                    checkout_detail = new List<DetailShowCheckoutDTO>()
+                                    checkout_detail = new List<Detail_Checkout>()
                                 };
 
                                 checkouts.Add(currentCheckout);
@@ -74,9 +74,10 @@ namespace Language.Data
 
                             if (currentCheckout != null)
                             {
-                                currentCheckout.checkout_detail.Add(new DetailShowCheckoutDTO
+                                currentCheckout.checkout_detail.Add(new Detail_Checkout
                                 {
                                     detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
+                                    checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     course_id = Guid.Parse(reader["course_id"].ToString()),
                                     checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
                                     category_course = reader["category_course"].ToString(),
@@ -95,9 +96,9 @@ namespace Language.Data
 
 
         //SelectAllByCheckoutId
-        public List<CheckoutDTO> GetAllByCheckoutId(Guid checkout_id)
+        public List<Checkout> GetAllByCheckoutId(Guid checkout_id)
         {
-            List<CheckoutDTO> checkouts = new List<CheckoutDTO>();
+            List<Checkout> checkouts = new List<Checkout>();
 
             string query = @"
                 SELECT
@@ -133,26 +134,27 @@ namespace Language.Data
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        CheckoutDTO currentCheckout = null;
+                        Checkout currentCheckout = null;
 
                         while (reader.Read())
                         {
                             if (currentCheckout == null)
                             {
-                                currentCheckout = new CheckoutDTO
+                                currentCheckout = new Checkout
                                 {
                                     checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
                                     id_payment_method = Guid.Parse(reader["id_payment_method"].ToString()),
-                                    checkout_detail = new List<DetailShowCheckoutDTO>()
+                                    checkout_detail = new List<Detail_Checkout>()
                                 };
 
                                 checkouts.Add(currentCheckout);
                             }
 
-                            currentCheckout.checkout_detail.Add(new DetailShowCheckoutDTO
+                            currentCheckout.checkout_detail.Add(new Detail_Checkout
                             {
                                 detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
+                                checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                 course_id = Guid.Parse(reader["course_id"].ToString()),
                                 checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
                                 category_course = reader["category_course"].ToString(),

@@ -7,7 +7,7 @@ namespace Language.Models
         public Guid user_id { get; set; }
         public Guid id_payment_method { get; set; }
 
-        public List<Detail_Checkout> DetailCheckouts { get; set; }
+        public List<Detail_Checkout> checkout_detail { get; set; }
 
 
 

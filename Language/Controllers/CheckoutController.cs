@@ -22,7 +22,7 @@ namespace Language.Controllers
         {
             try
             {
-                List<CheckoutDTO> checkouts = _checkout.GetAll();
+                List<Checkout> checkouts = _checkout.GetAll();
                 return Ok(checkouts);
             }
             catch (Exception ex)
@@ -36,7 +36,7 @@ namespace Language.Controllers
         {
             try
             {
-                List<CheckoutDTO> checkouts = _checkout.GetAllByCheckoutId(checkout_id);
+                List<Checkout> checkouts = _checkout.GetAllByCheckoutId(checkout_id);
                 return Ok(checkouts);
             }
             catch (Exception ex)
