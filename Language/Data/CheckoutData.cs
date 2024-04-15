@@ -200,5 +200,58 @@ namespace Language.Data
 
         }
 
+        //Update detail_checkout
+        public bool UpdateDetailCheckout(Guid detail_checkout_id, Detail_Checkout detailCheckout)
+        {
+            bool result = false;
+            string query = $"UPDATE detail_checkout " +
+                $"SET checklist = @checklist " +
+                $"WHERE detail_checkout_id = @detail_checkout_id";
+            
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using( MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.AddWithValue("@checklist", detailCheckout.checklist);
+                    command.Parameters.AddWithValue("@detail_checkout_id", detail_checkout_id);
+
+                    command.Connection = connection ;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+            return result ;
+        }
+
+        //Delete detail_checkout
+        public bool DeleteDetailCheckout(Guid detail_checkout_id)
+        {
+            bool result = false;
+            string query = $"DELETE FROM detail_checkout WHERE detail_checkout_id = @detail_checkout_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.AddWithValue("@detail_checkout_id", detail_checkout_id);
+
+                    command.Connection = connection;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+            return result;
+        }
+
     }
 }

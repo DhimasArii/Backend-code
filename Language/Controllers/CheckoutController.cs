@@ -80,5 +80,52 @@ namespace Language.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpPut("UpdateDetailCheckout")]
+        public IActionResult Put(Guid detail_checkout_id, [FromBody] UpdateDetailCheckoutDTO updateDetailCheckoutDto)
+        {
+            if (updateDetailCheckoutDto == null)
+            {
+                return BadRequest("Data Should be Inputed");
+            }
+
+            Detail_Checkout details = new Detail_Checkout
+            {
+                checklist = updateDetailCheckoutDto.checklist,
+
+            };
+
+            try
+            {
+                bool result = _checkout.UpdateDetailCheckout(detail_checkout_id, details);
+                if (result)
+                {
+                    return Ok("Update successful");
+                }
+                else
+                {
+                    return StatusCode(500, "error occur");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("DeleteDetailCheckout")]
+        public IActionResult Delete(Guid detail_checkout_id)
+        {
+            bool result = _checkout.DeleteDetailCheckout(detail_checkout_id);
+
+            if (result)
+            {
+                return Ok("Delete successful");
+            }
+            else
+            {
+                return StatusCode(500, "error occur");
+            }
+        }
     }
 }
