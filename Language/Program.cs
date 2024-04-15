@@ -8,6 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserData>();
+builder.Services.AddScoped<CheckoutData>();
 
 var app = builder.Build();
 

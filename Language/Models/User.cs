@@ -1,5 +1,4 @@
-﻿using System;
-namespace Language.Models
+﻿namespace Language.Models
 {
     public class User
     {
@@ -8,10 +7,7 @@ namespace Language.Models
         public string password { get; set; }
         public string address { get; set; }
         public string phone_number { get; set; }
-
-        
-
-
+       
 
     }
 }
