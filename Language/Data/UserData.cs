@@ -6,11 +6,11 @@ namespace Language.Data
     public class UserData
     {
         private readonly IConfiguration _configuration;
-        private readonly string connectionString;
+        private readonly string _connectionString;
         public UserData(IConfiguration configuration)
         {
             _configuration = configuration;
-            connectionString = _configuration.GetConnectionString("DefaultConnection");
+            _connectionString = _configuration.GetConnectionString("DefaultConnection");
         }
 
 
@@ -21,7 +21,7 @@ namespace Language.Data
         {
             List<User> users = new List<User>();
             string query = "SELECT * FROM users";
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -36,9 +36,8 @@ namespace Language.Data
                                 {
                                     user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                     email = reader["email"].ToString() ?? string.Empty,
-                                    password = reader["passwords"].ToString() ?? string.Empty,
-                                    address = reader["address"].ToString() ?? string.Empty,
-                                    phone_number = reader["phone_number"].ToString() ?? string.Empty,
+                                    passwords = reader["passwords"].ToString() ?? string.Empty,
+                                    
                                 });
                             }
                         }
@@ -66,7 +65,7 @@ namespace Language.Data
 
             string query = $"SELECT * FROM users WHERE user_id = @id";
 
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -88,9 +87,8 @@ namespace Language.Data
                                 user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
 
-                                password = reader["passwords"].ToString() ?? string.Empty,
-                                address = reader["address"].ToString() ?? string.Empty,
-                                phone_number = reader["phone_number"].ToString() ?? string.Empty,
+                                passwords = reader["passwords"].ToString() ?? string.Empty,
+                                
                             };
                         }
                     }
@@ -103,39 +101,126 @@ namespace Language.Data
         }
 
         //Insert
-        public bool Insert(User user)
+        //multiple sql command (with transaction)
+        public bool CreateUserAccount(User user, UserRole userRole)
         {
-            bool result = false;
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                {
+                    connection.Open();
+
+                    // Begin transaction
+                    using (MySqlTransaction transaction = connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            // Insert user data
+                            string insertUserQuery = "INSERT INTO users (user_id, email, passwords) VALUES (@user_id, @email, @password)";
+                            MySqlCommand insertUserCommand = new MySqlCommand(insertUserQuery, connection, transaction);
+                            insertUserCommand.Parameters.AddWithValue("@user_id", user.user_id);
+                            insertUserCommand.Parameters.AddWithValue("@email", user.email);
+                            insertUserCommand.Parameters.AddWithValue("@password", user.passwords);
+                            insertUserCommand.ExecuteNonQuery();
+
+                            // Insert user role data
+                            string insertUserRoleQuery = "INSERT INTO user_role (user_id, role) VALUES (@user_id, @role)";
+                            MySqlCommand insertUserRoleCommand = new MySqlCommand(insertUserRoleQuery, connection, transaction);
+                            insertUserRoleCommand.Parameters.AddWithValue("@user_id", userRole.user_id);
+                            insertUserRoleCommand.Parameters.AddWithValue("@role", userRole.role);
+                            insertUserRoleCommand.ExecuteNonQuery();
+
+                            // Commit transaction
+                            transaction.Commit();
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Rollback transaction on error
+                            transaction.Rollback();
+                            throw new Exception("Failed to create user account.", ex);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to connect to the database.", ex);
+            }
+        }
 
 
+        public User? CheckUserAuth(string email)
+        {
+            User? user = null;
 
-            string query = $"INSERT INTO users(user_id, email, passwords, address, phone_number) " + $"VALUES (@user_id, @email, @password, @address, @phone_number)";
-
-
-
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
-                    command.Parameters.AddWithValue("@user_id", user.user_id);
-                    command.Parameters.AddWithValue("@email", user.email);
-                    command.Parameters.AddWithValue("@password", user.password);
-                    command.Parameters.AddWithValue("@address", user.address);
-                    command.Parameters.AddWithValue("@phone_number", user.phone_number);
-
                     command.Connection = connection;
-                    command.CommandText = query;
+                    command.CommandText = "SELECT * from users WHERE email = @email";
+
+                    command.Parameters.Clear();
+
+                    command.Parameters.AddWithValue("@email", email);
 
                     connection.Open();
 
-                    result = command.ExecuteNonQuery() > 0 ? true : false;
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            user = new User
+                            {
+                                user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
+                                email = reader["email"].ToString() ?? string.Empty,
+                                passwords = reader["passwords"].ToString() ?? string.Empty
+                            };
+                        }
+                    }
 
                     connection.Close();
                 }
             }
 
-            return result;
+            return user;
+        }
 
+        public UserRole? GetUserRole(Guid user_id)
+        {
+            UserRole? userRole = null;
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Connection = connection;
+                    command.Parameters.Clear();
+
+                    command.CommandText = "SELECT * from user_role WHERE user_id = @user_id";
+                    command.Parameters.AddWithValue("@user_id", user_id);
+
+                    connection.Open();
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            userRole = new UserRole
+                            {
+                                id_user_role = Convert.ToInt32(reader["id_user_role"]),
+                                user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
+                                role = reader["role"].ToString() ?? string.Empty
+                            };
+                        }
+                    }
+
+                    connection.Close();
+                }
+            }
+
+            return userRole;
         }
 
         //Update
@@ -145,19 +230,18 @@ namespace Language.Data
 
 
 
-            string query = $"UPDATE users SET email = @email, passwords = @password, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
+            string query = $"UPDATE users SET email = @email, passwords = @passwords, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
 
 
 
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
                     command.Parameters.AddWithValue("@user_id", id);
                     command.Parameters.AddWithValue("@email", user.email);
-                    command.Parameters.AddWithValue("@password", user.password);
-                    command.Parameters.AddWithValue("@address", user.address);
-                    command.Parameters.AddWithValue("@phone_number", user.phone_number);
+                    command.Parameters.AddWithValue("@passwords", user.passwords);
+                    
 
                     command.Connection = connection;
                     command.CommandText = query;
@@ -181,7 +265,7 @@ namespace Language.Data
             string query = $"DELETE FROM users WHERE user_id = @user_id";
 
 
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
@@ -201,5 +285,8 @@ namespace Language.Data
 
             return result;
         }
+
+        
+
     }
 }

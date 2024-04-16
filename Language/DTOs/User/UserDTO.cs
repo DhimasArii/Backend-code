@@ -2,9 +2,8 @@
 {
     public class UserDTO
     {
-        public string email { get; set; }
-        public string password { get; set; }
-        public string address { get; set; }
-        public string phone_number { get; set; }
+        public string email { get; set; } = string.Empty;
+        public string passwords { get; set; } = string.Empty;
+        public string role { get; set; } = string.Empty;
     }
 }

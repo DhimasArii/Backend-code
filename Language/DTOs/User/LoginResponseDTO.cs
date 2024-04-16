@@ -2,6 +2,6 @@
 {
     public class LoginResponseDTO
     {
-        public string token { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 }
