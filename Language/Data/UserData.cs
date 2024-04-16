@@ -126,7 +126,7 @@ namespace Language.Data
 
                     MySqlCommand command2 = new MySqlCommand();
                     command2.Connection = connection;
-                    command1.Transaction = transaction;
+                    command2.Transaction = transaction;
                     command2.Parameters.Clear();
 
 
