@@ -4,6 +4,6 @@
     {
         public Guid detail_invoice_id { get; set; }
         public Guid invoice_id { get; set; }
-        public Guid course_id { get; set; }
+        public Guid schedule_id { get; set; }
     }
 }

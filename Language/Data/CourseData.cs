@@ -22,22 +22,22 @@ namespace Language.Data
             List<Category> categories = new List<Category>();
 
             string query = @"
-                SELECT
-                    ca.category_id,
-                    ca.category_name,
-                    ca.category_description,
-                    ca.category_image,
-                    c.course_id,
-                    c.course_name,
-                    c.course_description,
-                    c.course_image,
-                    c.price
-                FROM
-                    category ca
-                JOIN
-                    course c ON ca.category_id = c.category_id
-                ORDER BY
-                    ca.category_id, c.course_id";
+        SELECT
+            ca.category_id,
+            ca.category_name,
+            ca.category_description,
+            ca.category_image,
+            c.course_id,
+            c.course_name,
+            c.course_description,
+            c.course_image,
+            c.price
+        FROM
+            category ca
+        LEFT JOIN
+            course c ON ca.category_id = c.category_id
+        ORDER BY
+            ca.category_id, c.course_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -67,15 +67,18 @@ namespace Language.Data
 
                             if (currentCategory != null)
                             {
-                                currentCategory.courses.Add(new Course
+                                if (reader["course_id"] != DBNull.Value)
                                 {
-                                    course_id = Guid.Parse(reader["course_id"].ToString()),
-                                    category_id = Guid.Parse(reader["category_id"].ToString()),
-                                    course_name = reader["course_name"].ToString(),
-                                    course_description = reader["course_description"].ToString(),
-                                    course_image = reader["course_image"].ToString(),
-                                    price = int.Parse(reader["price"].ToString())
-                                });
+                                    currentCategory.courses.Add(new Course
+                                    {
+                                        course_id = Guid.Parse(reader["course_id"].ToString()),
+                                        category_id = Guid.Parse(reader["category_id"].ToString()),
+                                        course_name = reader["course_name"].ToString(),
+                                        course_description = reader["course_description"].ToString(),
+                                        course_image = reader["course_image"].ToString(),
+                                        price = int.Parse(reader["price"].ToString())
+                                    });
+                                }
                             }
                         }
                     }
@@ -84,6 +87,7 @@ namespace Language.Data
 
             return categories;
         }
+
 
         //SelectAllCategory
         public List<Category> GetAllCategories()
@@ -176,21 +180,22 @@ namespace Language.Data
 
 
 
-        //Insert detail_checkout
-        public bool InsertDetailCheckout(Detail_Checkout detailCheckout)
+        //Insert category
+        public bool CreateCategory(Category category)
         {
             bool result = false;
-            string query = $"INSERT INTO detail_checkout (detail_checkout_id, checkout_id, course_id, checklist) " +
-                     $"VALUES (@detail_checkout_id, @checkout_id, @course_id, @checklist)";
+            string query = $"INSERT INTO Category (category_id, category_name, category_description, category_image) " +
+                     $"VALUES (@category_id, @category_name, @category_description, @category_image)";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
-                    command.Parameters.AddWithValue("@detail_checkout_id", detailCheckout.detail_checkout_id);
-                    command.Parameters.AddWithValue("@checkout_id", detailCheckout.checkout_id);
-                    command.Parameters.AddWithValue("@course_id", detailCheckout.course_id);
-                    command.Parameters.AddWithValue("@checklist", detailCheckout.checklist);
+                    command.Parameters.AddWithValue("@category_id", category.category_id);
+                    command.Parameters.AddWithValue("@category_name", category.category_name);
+                    command.Parameters.AddWithValue("@category_description", category.category_description);
+                    command.Parameters.AddWithValue("@category_image", category.category_image);
+
 
                     command.Connection = connection;
                     command.CommandText = query;
@@ -206,20 +211,22 @@ namespace Language.Data
 
         }
 
-        //Update detail_checkout
-        public bool UpdateDetailCheckout(Guid detail_checkout_id, Detail_Checkout detailCheckout)
+        //Update category
+        public bool UpdateCategory(Guid category_id, Category category)
         {
             bool result = false;
-            string query = $"UPDATE detail_checkout " +
-                $"SET checklist = @checklist " +
-                $"WHERE detail_checkout_id = @detail_checkout_id";
+            string query = $"UPDATE Category SET category_name = @category_name, " +
+                           $"category_description = @category_description, category_image = @category_image " +
+                           $"WHERE category_id = @category_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
-                    command.Parameters.AddWithValue("@checklist", detailCheckout.checklist);
-                    command.Parameters.AddWithValue("@detail_checkout_id", detail_checkout_id);
+                    command.Parameters.AddWithValue("@category_name", category.category_name);
+                    command.Parameters.AddWithValue("@category_description", category.category_description);
+                    command.Parameters.AddWithValue("@category_image", category.category_image);
+                    command.Parameters.AddWithValue("@category_id", category_id);
 
                     command.Connection = connection;
                     command.CommandText = query;
@@ -234,17 +241,23 @@ namespace Language.Data
             return result;
         }
 
-        //Delete detail_checkout
-        public bool DeleteDetailCheckout(Guid detail_checkout_id)
+        //Insert course
+        public bool CreateCourse(Course course)
         {
             bool result = false;
-            string query = $"DELETE FROM detail_checkout WHERE detail_checkout_id = @detail_checkout_id";
+            string query = $"INSERT INTO course (course_id, category_id, course_name, course_description, course_image, price) " +
+                           $"VALUES (@course_id, @category_id, @course_name, @course_description, @course_image, @price)";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand())
                 {
-                    command.Parameters.AddWithValue("@detail_checkout_id", detail_checkout_id);
+                    command.Parameters.AddWithValue("@course_id", course.course_id);
+                    command.Parameters.AddWithValue("@category_id", course.category_id);
+                    command.Parameters.AddWithValue("@course_name", course.course_name);
+                    command.Parameters.AddWithValue("@course_description", course.course_description);
+                    command.Parameters.AddWithValue("@course_image", course.course_image);
+                    command.Parameters.AddWithValue("@price", course.price);
 
                     command.Connection = connection;
                     command.CommandText = query;
@@ -258,6 +271,64 @@ namespace Language.Data
             }
             return result;
         }
+
+        //Update course
+        public bool UpdateCourse(Guid course_id, Course course)
+        {
+            bool result = false;
+            string query = $"UPDATE course SET category_id = @category_id, course_name = @course_name, " +
+                           $"course_description = @course_description, course_image = @course_image, price = @price " +
+                           $"WHERE course_id = @course_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.AddWithValue("@category_id", course.category_id);
+                    command.Parameters.AddWithValue("@course_name", course.course_name);
+                    command.Parameters.AddWithValue("@course_description", course.course_description);
+                    command.Parameters.AddWithValue("@course_image", course.course_image);
+                    command.Parameters.AddWithValue("@price", course.price);
+                    command.Parameters.AddWithValue("@course_id", course_id);
+
+                    command.Connection = connection;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+            return result;
+        }
+
+        //Delete course
+        public bool DeleteCourse(Guid course_id)
+        {
+            bool result = false;
+            string query = $"DELETE FROM course WHERE course_id = @course_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.AddWithValue("@course_id", course_id);
+
+                    command.Connection = connection;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+            return result;
+        }
+
 
     }
 }

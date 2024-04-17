@@ -58,7 +58,7 @@ namespace Language.Controllers
             {
                 detail_checkout_id = Guid.NewGuid(),
                 checkout_id = detailCheckoutDto.checkout_id,
-                course_id = detailCheckoutDto.course_id,
+                schedule_id = detailCheckoutDto.schedule_id,
                 checklist = detailCheckoutDto.checklist,
 
             };
