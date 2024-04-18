@@ -225,17 +225,22 @@ namespace Language.Data
             List<Course> courses = new List<Course>();
 
             string query = @"
-        SELECT
-            course_id,
-            category_id,
-            course_name,
-            course_description,
-            course_image,
-            price
-        FROM
-            course
-        WHERE
-            category_id = @category_id";
+                        SELECT
+                            c.course_id,
+                            c.category_id,
+                            c.course_name,
+                            c.course_description,
+                            c.course_image,
+                            c.price,
+                            ca.category_name
+                        FROM
+                            course c
+                        JOIN
+                            category ca ON c.category_id = ca.category_id
+                        WHERE
+                            c.category_id = @category_id";
+
+
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -252,6 +257,61 @@ namespace Language.Data
                             {
                                 course_id = Guid.Parse(reader["course_id"].ToString()),
                                 category_id = Guid.Parse(reader["category_id"].ToString()),
+                                category_name = reader["category_name"].ToString(),
+                                course_name = reader["course_name"].ToString(),
+                                course_description = reader["course_description"].ToString(),
+                                course_image = reader["course_image"].ToString(),
+                                price = int.Parse(reader["price"].ToString())
+                            };
+
+                            courses.Add(course);
+                        }
+                    }
+                }
+            }
+
+            return courses;
+        }
+
+        //SelectAllByCourseId
+        public List<Course> GetAllByCourseId(Guid course_id)
+        {
+            List<Course> courses = new List<Course>();
+
+            string query = @"
+                        SELECT
+                            c.course_id,
+                            c.category_id,
+                            c.course_name,
+                            c.course_description,
+                            c.course_image,
+                            c.price,
+                            ca.category_name
+                        FROM
+                            course c
+                        JOIN
+                            category ca ON c.category_id = ca.category_id
+                        WHERE
+                            c.course_id = @course_id";
+
+
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@course_id", course_id);
+                    connection.Open();
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Course course = new Course
+                            {
+                                course_id = Guid.Parse(reader["course_id"].ToString()),
+                                category_id = Guid.Parse(reader["category_id"].ToString()),
+                                category_name = reader["category_name"].ToString(),
                                 course_name = reader["course_name"].ToString(),
                                 course_description = reader["course_description"].ToString(),
                                 course_image = reader["course_image"].ToString(),
