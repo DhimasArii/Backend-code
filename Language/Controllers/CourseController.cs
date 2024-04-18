@@ -34,6 +34,25 @@ namespace Language.Controllers
             }
         }
 
+        [HttpGet("GetAllCourse")]
+        public IActionResult GetAllCourses()
+        {
+            try
+            {
+                List<Course> courses = _course.GetAllCourses();
+                if (courses == null || courses.Count == 0)
+                {
+                    return NotFound("No courses found.");
+                }
+
+                return Ok(courses);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpGet("GetAllCoursesByCategory/{category_id}")]
         public IActionResult GetAllCoursesByCategory(Guid category_id)
         {

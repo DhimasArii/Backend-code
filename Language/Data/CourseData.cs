@@ -88,6 +88,51 @@ namespace Language.Data
             return categories;
         }
 
+        //SelectAllCourses
+        public List<Course> GetAllCourses()
+        {
+            List<Course> courses = new List<Course>();
+
+            string query = @"
+        SELECT
+            course_id,
+            category_id,
+            course_name,
+            course_description,
+            course_image,
+            price
+        FROM
+            course
+        ORDER BY course_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Course course = new Course
+                            {
+                                course_id = Guid.Parse(reader["course_id"].ToString()),
+                                category_id = Guid.Parse(reader["category_id"].ToString()),
+                                course_name = reader["course_name"].ToString(),
+                                course_description = reader["course_description"].ToString(),
+                                course_image = reader["course_image"].ToString(),
+                                price = int.Parse(reader["price"].ToString())
+                            };
+
+                            courses.Add(course);
+                        }
+                    }
+                }
+            }
+
+            return courses;
+        }
 
         //SelectAllCategory
         public List<Category> GetAllCategories()
@@ -101,12 +146,56 @@ namespace Language.Data
                     category_description,
                     category_image
                 FROM
-                    category";
+                    category
+                ORDER BY category_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
+                    connection.Open();
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Category category = new Category
+                            {
+                                category_id = Guid.Parse(reader["category_id"].ToString()),
+                                category_name = reader["category_name"].ToString(),
+                                category_description = reader["category_description"].ToString(),
+                                category_image = reader["category_image"].ToString()
+                            };
+
+                            categories.Add(category);
+                        }
+                    }
+                }
+            }
+
+            return categories;
+        }
+
+        //SelectByCategoryId
+        public List<Category> GetByCategoryId(Guid category_id)
+        {
+            List<Category> categories = new List<Category>();
+
+            string query = @"
+                SELECT
+                    category_id,
+                    category_name,
+                    category_description,
+                    category_image
+                FROM
+                    category
+                WHERE category_id = @category_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@category_id", category_id);
                     connection.Open();
 
                     using (MySqlDataReader reader = command.ExecuteReader())

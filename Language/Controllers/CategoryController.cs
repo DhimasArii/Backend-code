@@ -44,6 +44,31 @@ namespace Language.Controllers
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }
+        [HttpGet("{category_id}")]
+        public IActionResult GetCategory(Guid category_id)
+        {
+            try
+            {
+                List<Category> categories = _course.GetByCategoryId(category_id);
+                var categoryDetailsList = new List<object>();
+                foreach (var category in categories)
+                {
+                    var categoryDetails = new
+                    {
+                        category.category_id,
+                        category.category_name,
+                        category.category_description,
+                        category.category_image
+                    };
+                    categoryDetailsList.Add(categoryDetails);
+                }
+                return Ok(categoryDetailsList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
         [HttpPost("CreateCategory")]
         [Authorize(Roles = "admin")]
