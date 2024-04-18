@@ -72,6 +72,7 @@ namespace Language.Controllers
                     user_id = Guid.NewGuid(),
                     email = userDto.email,
                     passwords = BCrypt.Net.BCrypt.HashPassword(userDto.passwords),
+                    IsActivated = false
                 };
 
                 UserRole userRole = new UserRole
