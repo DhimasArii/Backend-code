@@ -119,10 +119,11 @@ namespace Language.Data
                     command1.Transaction = transaction;
                     command1.Parameters.Clear();
 
-                    command1.CommandText = "INSERT INTO users (user_id, email, passwords) VALUES (@user_id, @email, @passwords)";
+                    command1.CommandText = "INSERT INTO users (user_id, email, passwords, IsActivated) VALUES (@user_id, @email, @passwords, @isActivated)";
                     command1.Parameters.AddWithValue("@user_id", user.user_id);
                     command1.Parameters.AddWithValue("@email", user.email);
                     command1.Parameters.AddWithValue("@passwords", user.passwords);
+                    command1.Parameters.AddWithValue("@isActivated", user.IsActivated);
 
                     MySqlCommand command2 = new MySqlCommand();
                     command2.Connection = connection;
@@ -181,7 +182,8 @@ namespace Language.Data
                             {
                                 user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                passwords = reader["passwords"].ToString() ?? string.Empty
+                                passwords = reader["passwords"].ToString() ?? string.Empty,
+                                IsActivated = Convert.ToBoolean(reader["IsActivated"])
                             };
                         }
                     }
@@ -227,6 +229,57 @@ namespace Language.Data
             }
 
             return userRole;
+        }
+
+        public bool ActivateUser(Guid id)
+        {
+            bool result = false;
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                MySqlCommand command = new MySqlCommand();
+                command.Connection = connection;
+                command.Parameters.Clear();
+
+                command.CommandText = "UPDATE Users SET IsActivated = 1 WHERE user_id = @user_id";
+                command.Parameters.AddWithValue("@user_id", id);
+
+                connection.Open();
+                result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public bool ResetPassword(string email, string password)
+        {
+            bool result = false;
+
+            string query = "UPDATE Users SET passwords = @Password WHERE email = @Email";
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Connection = connection;
+                    command.Parameters.Clear();
+
+                    command.CommandText = query;
+
+                    command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@Password", password);
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+
+            return result;
         }
 
         //Update
