@@ -104,58 +104,59 @@ namespace Language.Data
         //multiple sql command (with transaction)
         public bool CreateUserAccount(User user, UserRole userRole)
         {
-            bool result = false;
-
-            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            try
             {
-                connection.Open();
-
-                MySqlTransaction transaction = connection.BeginTransaction();
-
-                try
+                using (MySqlConnection connection = new MySqlConnection(_connectionString))
                 {
-                    MySqlCommand command1 = new MySqlCommand();
-                    command1.Connection = connection;
-                    command1.Transaction = transaction;
-                    command1.Parameters.Clear();
+                    connection.Open();
 
+<<<<<<< HEAD
                     command1.CommandText = "INSERT INTO users (user_id, email, passwords, IsActivated) VALUES (@user_id, @email, @passwords, @isActivated)";
                     command1.Parameters.AddWithValue("@user_id", user.user_id);
                     command1.Parameters.AddWithValue("@email", user.email);
                     command1.Parameters.AddWithValue("@passwords", user.passwords);
                     command1.Parameters.AddWithValue("@isActivated", user.IsActivated);
+=======
+                    // Begin transaction
+                    using (MySqlTransaction transaction = connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            // Insert user data
+                            string insertUserQuery = "INSERT INTO users (user_id, email, passwords) VALUES (@user_id, @email, @password)";
+                            MySqlCommand insertUserCommand = new MySqlCommand(insertUserQuery, connection, transaction);
+                            insertUserCommand.Parameters.AddWithValue("@user_id", user.user_id);
+                            insertUserCommand.Parameters.AddWithValue("@email", user.email);
+                            insertUserCommand.Parameters.AddWithValue("@password", user.passwords);
+                            insertUserCommand.ExecuteNonQuery();
+>>>>>>> refs/remotes/origin/master_new
 
-                    MySqlCommand command2 = new MySqlCommand();
-                    command2.Connection = connection;
-                    command2.Transaction = transaction;
-                    command2.Parameters.Clear();
+                            // Insert user role data
+                            string insertUserRoleQuery = "INSERT INTO user_role (user_id, role) VALUES (@user_id, @role)";
+                            MySqlCommand insertUserRoleCommand = new MySqlCommand(insertUserRoleQuery, connection, transaction);
+                            insertUserRoleCommand.Parameters.AddWithValue("@user_id", userRole.user_id);
+                            insertUserRoleCommand.Parameters.AddWithValue("@role", userRole.role);
+                            insertUserRoleCommand.ExecuteNonQuery();
 
-
-                    command2.CommandText = "INSERT INTO user_role (user_id, role) VALUES (@user_id, @role)";
-                    command2.Parameters.AddWithValue("@user_id", userRole.user_id);
-                    command2.Parameters.AddWithValue("@role", userRole.role);
-
-                    var result1 = command1.ExecuteNonQuery();
-                    var result2 = command2.ExecuteNonQuery();
-
-                    transaction.Commit();
-
-                    result = true;
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    throw new Exception("Failed to create user account.", ex);
-                }
-                finally
-                {
-                    connection.Close();
+                            // Commit transaction
+                            transaction.Commit();
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Rollback transaction on error
+                            transaction.Rollback();
+                            throw new Exception("Failed to create user account.", ex);
+                        }
+                    }
                 }
             }
-
-            return result;
-
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to connect to the database.", ex);
+            }
         }
+
 
         public User? CheckUserAuth(string email)
         {

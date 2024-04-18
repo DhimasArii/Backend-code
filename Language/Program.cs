@@ -44,6 +44,7 @@ builder.Services.AddSwaggerGen(option =>
 
 builder.Services.AddScoped<UserData>();
 builder.Services.AddScoped<CheckoutData>();
+builder.Services.AddScoped<CourseData>();
 
 builder.Services.AddCors();
 
