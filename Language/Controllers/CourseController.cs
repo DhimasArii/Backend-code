@@ -67,6 +67,20 @@ namespace Language.Controllers
             }
         }
 
+        [HttpGet("{course_id}")]
+        public IActionResult GetAllByCourseId(Guid course_id)
+        {
+            try
+            {
+                List<Course> courses = _course.GetAllByCourseId(course_id);
+                return Ok(courses);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPost]
         public IActionResult CreateCourse([FromBody] Course course)
         {
