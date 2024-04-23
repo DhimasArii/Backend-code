@@ -227,7 +227,7 @@ namespace Language.Controllers
                 {"email", email }
             };
 
-            string callbackUrl = QueryHelpers.AddQueryString("https://localhost:3000/formResetPassword", param);
+            string callbackUrl = QueryHelpers.AddQueryString("http://localhost:5173/new-password", param);
 
             string body = "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>";
 
