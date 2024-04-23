@@ -288,7 +288,7 @@ namespace Language.Controllers
         {"email", user.email } // Tambahkan email sebagai parameter
     };
 
-            string callbackUrl = QueryHelpers.AddQueryString("https://localhost:3000/api/User/ActivateUser", param);
+            string callbackUrl = QueryHelpers.AddQueryString("https://localhost:7175/api/User/ActivateUser", param);
 
             EmailActivationModel model = new EmailActivationModel()
             {

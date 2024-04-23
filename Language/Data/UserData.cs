@@ -131,7 +131,7 @@ namespace Language.Data
                     command2.Transaction = transaction;
                     command2.Parameters.Clear();
 
-                    command2.CommandText = "INSERT INTO UserRoles (UserId, Role) VALUES (@userId, @role)";
+                    command2.CommandText = "INSERT INTO user_role (user_id, role) VALUES (@userId, @role)";
                     command2.Parameters.AddWithValue("@userId", userRole.user_id);
                     command2.Parameters.AddWithValue("@role", userRole.role);
 
