@@ -102,7 +102,7 @@ namespace Language.Data
 
         //Insert
         //multiple sql command (with transaction)
-        
+
         public bool CreateUserAccount(User user, UserRole userRole)
         {
             bool result = false;
@@ -128,9 +128,8 @@ namespace Language.Data
 
                     MySqlCommand command2 = new MySqlCommand();
                     command2.Connection = connection;
-                    command1.Transaction = transaction;
+                    command2.Transaction = transaction;
                     command2.Parameters.Clear();
-
 
                     command2.CommandText = "INSERT INTO UserRoles (UserId, Role) VALUES (@userId, @role)";
                     command2.Parameters.AddWithValue("@userId", userRole.user_id);
@@ -139,13 +138,20 @@ namespace Language.Data
                     var result1 = command1.ExecuteNonQuery();
                     var result2 = command2.ExecuteNonQuery();
 
-                    transaction.Commit();
-
-                    result = true;
+                    if (result1 > 0 && result2 > 0)
+                    {
+                        transaction.Commit();
+                        result = true;
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                    }
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
+                    throw new Exception("Failed to create user account", ex);
                 }
                 finally
                 {
@@ -154,8 +160,8 @@ namespace Language.Data
             }
 
             return result;
-
         }
+
 
 
         public User? CheckUserAuth(string email)

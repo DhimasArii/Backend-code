@@ -62,11 +62,15 @@ namespace Language.Controllers
         }
 
         [HttpPost("CreateUser")]
-
         public async Task<IActionResult> CreateUserAsync([FromBody] UserDTO userDto)
         {
             try
             {
+                if (userDto == null || string.IsNullOrWhiteSpace(userDto.email) || string.IsNullOrWhiteSpace(userDto.passwords))
+                {
+                    return BadRequest("Invalid user data");
+                }
+
                 User user = new User
                 {
                     user_id = Guid.NewGuid(),
@@ -95,9 +99,10 @@ namespace Language.Controllers
             }
             catch (Exception ex)
             {
-                return Problem(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
+
 
         [HttpPost("login")]
 
