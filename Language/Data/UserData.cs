@@ -102,52 +102,66 @@ namespace Language.Data
 
         //Insert
         //multiple sql command (with transaction)
+
         public bool CreateUserAccount(User user, UserRole userRole)
         {
-            try
+            bool result = false;
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
-                using (MySqlConnection connection = new MySqlConnection(_connectionString))
+                connection.Open();
+
+                MySqlTransaction transaction = connection.BeginTransaction();
+
+                try
                 {
-                    connection.Open();
+                    MySqlCommand command1 = new MySqlCommand();
+                    command1.Connection = connection;
+                    command1.Transaction = transaction;
+                    command1.Parameters.Clear();
 
-                    // Begin transaction
-                    using (MySqlTransaction transaction = connection.BeginTransaction())
+                    command1.CommandText = "INSERT INTO users (user_id, email, passwords, IsActivated) VALUES (@user_id, @email, @passwords, @isActivated)";
+                    command1.Parameters.AddWithValue("@user_id", user.user_id);
+                    command1.Parameters.AddWithValue("@email", user.email);
+                    command1.Parameters.AddWithValue("@passwords", user.passwords);
+                    command1.Parameters.AddWithValue("@isActivated", user.IsActivated);
+
+                    MySqlCommand command2 = new MySqlCommand();
+                    command2.Connection = connection;
+                    command2.Transaction = transaction;
+                    command2.Parameters.Clear();
+
+                    command2.CommandText = "INSERT INTO user_role (user_id, role) VALUES (@userId, @role)";
+                    command2.Parameters.AddWithValue("@userId", userRole.user_id);
+                    command2.Parameters.AddWithValue("@role", userRole.role);
+
+                    var result1 = command1.ExecuteNonQuery();
+                    var result2 = command2.ExecuteNonQuery();
+
+                    if (result1 > 0 && result2 > 0)
                     {
-                        try
-                        {
-                            // Insert user data
-                            string insertUserQuery = "INSERT INTO users (user_id, email, passwords) VALUES (@user_id, @email, @password)";
-                            MySqlCommand insertUserCommand = new MySqlCommand(insertUserQuery, connection, transaction);
-                            insertUserCommand.Parameters.AddWithValue("@user_id", user.user_id);
-                            insertUserCommand.Parameters.AddWithValue("@email", user.email);
-                            insertUserCommand.Parameters.AddWithValue("@password", user.passwords);
-                            insertUserCommand.ExecuteNonQuery();
-
-                            // Insert user role data
-                            string insertUserRoleQuery = "INSERT INTO user_role (user_id, role) VALUES (@user_id, @role)";
-                            MySqlCommand insertUserRoleCommand = new MySqlCommand(insertUserRoleQuery, connection, transaction);
-                            insertUserRoleCommand.Parameters.AddWithValue("@user_id", userRole.user_id);
-                            insertUserRoleCommand.Parameters.AddWithValue("@role", userRole.role);
-                            insertUserRoleCommand.ExecuteNonQuery();
-
-                            // Commit transaction
-                            transaction.Commit();
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            // Rollback transaction on error
-                            transaction.Rollback();
-                            throw new Exception("Failed to create user account.", ex);
-                        }
+                        transaction.Commit();
+                        result = true;
+                    }
+                    else
+                    {
+                        transaction.Rollback();
                     }
                 }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Failed to create user account", ex);
+                }
+                finally
+                {
+                    connection.Close();
+                }
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to connect to the database.", ex);
-            }
+
+            return result;
         }
+
 
 
         public User? CheckUserAuth(string email)
@@ -175,7 +189,8 @@ namespace Language.Data
                             {
                                 user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                 email = reader["email"].ToString() ?? string.Empty,
-                                passwords = reader["passwords"].ToString() ?? string.Empty
+                                passwords = reader["passwords"].ToString() ?? string.Empty,
+                                IsActivated = Convert.ToBoolean(reader["IsActivated"])
                             };
                         }
                     }
@@ -221,6 +236,57 @@ namespace Language.Data
             }
 
             return userRole;
+        }
+
+        public bool ActivateUser(Guid id)
+        {
+            bool result = false;
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                MySqlCommand command = new MySqlCommand();
+                command.Connection = connection;
+                command.Parameters.Clear();
+
+                command.CommandText = "UPDATE Users SET IsActivated = 1 WHERE user_id = @user_id";
+                command.Parameters.AddWithValue("@user_id", id);
+
+                connection.Open();
+                result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public bool ResetPassword(string email, string password)
+        {
+            bool result = false;
+
+            string query = "UPDATE Users SET passwords = @Password WHERE email = @Email";
+
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Connection = connection;
+                    command.Parameters.Clear();
+
+                    command.CommandText = query;
+
+                    command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@Password", password);
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+
+            return result;
         }
 
         //Update

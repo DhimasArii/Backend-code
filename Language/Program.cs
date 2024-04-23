@@ -1,4 +1,5 @@
 using Language.Data;
+using Language.DTOs.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -45,6 +46,7 @@ builder.Services.AddSwaggerGen(option =>
 builder.Services.AddScoped<UserData>();
 builder.Services.AddScoped<CheckoutData>();
 builder.Services.AddScoped<CourseData>();
+builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddCors();
 
