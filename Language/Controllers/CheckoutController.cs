@@ -45,7 +45,41 @@ namespace Language.Controllers
             }
         }
 
-        
+        [HttpPost("AddCheckout")]
+        public IActionResult AddCheckout([FromBody] CheckoutDTO checkoutDto)
+        {
+            if (checkoutDto == null)
+            {
+                return BadRequest("Data Should be Inputed");
+            }
+
+            Checkout checkout = new Checkout
+            {
+                checkout_id = Guid.NewGuid(),
+                user_id = checkoutDto.user_id,
+                id_payment_method = checkoutDto.id_payment_method,
+
+            };
+            
+
+            try
+            {
+                bool result = _checkout.InsertCheckout(checkout);
+                if (result)
+                {
+                    return StatusCode(201, checkout.checkout_id);
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to add detail checkout.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpPost("AddDetailCheckout")]
         public IActionResult AddDetailCheckout([FromBody] DetailCheckoutDTO detailCheckoutDto)
         {

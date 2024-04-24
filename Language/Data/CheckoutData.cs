@@ -169,6 +169,34 @@ namespace Language.Data
             return checkouts;
         }
 
+        //Insert checkout
+        public bool InsertCheckout(Checkout checkout)
+        {
+            bool result = false;
+            string query = $"INSERT INTO checkout (checkout_id, user_id) " +
+                     $"VALUES (@checkout_id, @user_id)";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.AddWithValue("@checkout_id", checkout.checkout_id);
+                    command.Parameters.AddWithValue("@user_id", checkout.user_id);
+                    //command.Parameters.AddWithValue("@id_payment_method", checkout.id_payment_method);
+
+                    command.Connection = connection;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+            return result;
+
+        }
 
         //Insert detail_checkout
         public bool InsertDetailCheckout(Detail_Checkout detailCheckout)
