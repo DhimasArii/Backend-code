@@ -31,7 +31,7 @@ namespace Language.Data
         dc.detail_checkout_id,
         dc.schedule_id,
         dc.checklist,
-        CONCAT(ca.category_name, ' - ', c.course_name) AS category_course,
+        ca.category_name,
         c.course_name,
         cs.course_date
     FROM
@@ -80,13 +80,15 @@ namespace Language.Data
                                     checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
                                     checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
-                                    category_course = reader["category_course"].ToString(),
+                                    category_name = reader["category_name"].ToString(),
                                     course_name = reader["course_name"].ToString(),
                                     course_date = Convert.ToDateTime(reader["course_date"])
                                 });
                             }
                         }
                     }
+
+                    connection.Close();
                 }
             }
 
@@ -108,7 +110,7 @@ namespace Language.Data
         dc.detail_checkout_id,
         dc.schedule_id,
         dc.checklist,
-        CONCAT(ca.category_name, ' - ', c.course_name) AS category_course,
+        ca.category_name,
         c.course_name,
         cs.course_date
     FROM
@@ -157,13 +159,14 @@ namespace Language.Data
                                 checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                 schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
                                 checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
-                                category_course = reader["category_course"].ToString(),
+                                category_name = reader["category_name"].ToString(),
                                 course_name = reader["course_name"].ToString(),
                                 course_date = Convert.ToDateTime(reader["course_date"])
                             });
                         }
                     }
                 }
+                connection.Close();
             }
 
             return checkouts;
@@ -281,53 +284,7 @@ namespace Language.Data
             return result;
         }
 
-        //move ke invoice
-        public bool AddInvoice(User user, UserRole userRole)
-        {
-            try
-            {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    // Begin transaction
-                    using (MySqlTransaction transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            // Insert invoice data
-                            string insertUserQuery = "INSERT INTO users (user_id, email, passwords) VALUES (@user_id, @email, @password)";
-                            MySqlCommand insertUserCommand = new MySqlCommand(insertUserQuery, connection, transaction);
-                            insertUserCommand.Parameters.AddWithValue("@user_id", user.user_id);
-                            insertUserCommand.Parameters.AddWithValue("@email", user.email);
-                            insertUserCommand.Parameters.AddWithValue("@password", user.passwords);
-                            insertUserCommand.ExecuteNonQuery();
-
-                            // Insert detail_invoice data
-                            string insertUserRoleQuery = "INSERT INTO user_role (user_id, role) VALUES (@user_id, @role)";
-                            MySqlCommand insertUserRoleCommand = new MySqlCommand(insertUserRoleQuery, connection, transaction);
-                            insertUserRoleCommand.Parameters.AddWithValue("@user_id", userRole.user_id);
-                            insertUserRoleCommand.Parameters.AddWithValue("@role", userRole.role);
-                            insertUserRoleCommand.ExecuteNonQuery();
-
-                            // Commit transaction
-                            transaction.Commit();
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            // Rollback transaction on error
-                            transaction.Rollback();
-                            throw new Exception("Failed to create user account.", ex);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to connect to the database.", ex);
-            }
-        }
+        
 
     }
 }
