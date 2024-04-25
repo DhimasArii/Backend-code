@@ -25,6 +25,7 @@ namespace Language.Data
                         i.user_id,
                         i.invoice_number,
                         i.invoice_date,
+                        i.total_price,  
                         c.course_name,
                         ca.category_name,
                         cs.course_date,
@@ -36,14 +37,8 @@ namespace Language.Data
                             JOIN course_schedule cs ON c.course_id = cs.course_id
                             JOIN detail_invoice di ON cs.schedule_id = di.schedule_id
                             WHERE di.detail_invoice_id = detail_invoice_id
-                        ) AS total_course,
-                        (
-                            SELECT SUM(c.price)
-                            FROM course c
-                            JOIN course_schedule cs ON c.course_id = cs.course_id
-                            JOIN detail_invoice di ON cs.schedule_id = di.schedule_id
-                            WHERE di.detail_invoice_id = detail_invoice_id
-                        ) AS total_price
+                        ) AS total_course
+                      
                     FROM
                         invoice i
                     JOIN
@@ -120,8 +115,7 @@ namespace Language.Data
             string query = "INSERT INTO invoice (invoice_id, user_id, invoice_number, invoice_date, total_price) " +
                    "VALUES (@invoice_id, @user_id, @invoice_number, @invoice_date, @total_price)";
 
-            try
-            {
+            
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -144,10 +138,101 @@ namespace Language.Data
                         connection.Close();
                     }
                 }
-            }
-            catch (Exception ex)
+            
+            
+
+            return result;
+        }
+
+        public bool CreateInvoice(Invoice invoice, Detail_Invoice detail_Invoice)
+        {
+            bool result = false;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
+                connection.Open();
+
+                MySqlTransaction transaction = connection.BeginTransaction();
+
+                try
+                {
+                    MySqlCommand command1 = new MySqlCommand();
+                    command1.Connection = connection;
+                    command1.Transaction = transaction;
+                    command1.Parameters.Clear();
+
+                    command1.CommandText =  "INSERT INTO invoice (invoice_id, user_id, invoice_number, invoice_date, total_price) " +
+                                            "VALUES (@invoice_id, @user_id, @invoice_number, @invoice_date, @total_price)";
+                    command1.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
+                    command1.Parameters.AddWithValue("@user_id", invoice.user_id);
+                    command1.Parameters.AddWithValue("@invoice_number", invoice.invoice_number);
+                    command1.Parameters.AddWithValue("@invoice_date", invoice.invoice_date);
+                    command1.Parameters.AddWithValue("@total_price", invoice.total_price);
+
+                    MySqlCommand command2 = new MySqlCommand();
+                    command2.Connection = connection;
+                    command2.Transaction = transaction;
+                    command2.Parameters.Clear();
+
+                    command2.CommandText = @"INSERT INTO detail_invoice (detail_invoice_id, invoice_id, schedule_id)
+                                            SELECT 
+                                                UUID(),
+                                                @invoice_id,
+                                                dc.schedule_id
+                                            FROM 
+                                                detail_checkout dc
+                                            JOIN
+                                                checkout co ON dc.checkout_id = co.checkout_id
+                                            WHERE 
+                                                dc.checklist = TRUE
+                                                AND co.user_id = @user_id";
+
+                    //command2.Parameters.AddWithValue("@detail_invoice_id", detail_Invoice.detail_invoice_id);
+                    command2.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
+                    command2.Parameters.AddWithValue("@user_id", invoice.user_id);
+
+                    MySqlCommand command3 = new MySqlCommand();
+                    command3.Connection = connection;
+                    command3.Transaction = transaction;
+                    command3.Parameters.Clear();
+
+                    command3.CommandText = @"UPDATE invoice
+                                         SET total_price = (SELECT SUM(c.price)
+                                                            FROM course c
+                                                            JOIN course_schedule cs ON c.course_id = cs.course_id
+                                                            JOIN detail_invoice di ON cs.schedule_id = di.schedule_id
+                                                            WHERE di.invoice_id = @invoice_id)
+                                         WHERE invoice_id = @invoice_id";
+
+                    command3.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
+
+
+
+
+
+                    var result1 = command1.ExecuteNonQuery();
+                    var result2 = command2.ExecuteNonQuery();
+                    var result3 = command3.ExecuteNonQuery();
+
+                    if (result1 > 0 && result2 > 0 && result3 > 0)
+                    {
+                        transaction.Commit();
+                        result = true;
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Failed to create invoice", ex);
+                }
+                finally
+                {
+                    connection.Close();
+                }
             }
 
             return result;
