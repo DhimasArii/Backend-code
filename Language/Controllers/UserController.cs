@@ -162,6 +162,7 @@ namespace Language.Controllers
             }
         }
 
+
         [HttpGet("ActivateUser")]
         public IActionResult ActivateUser(Guid id, string email)
         {

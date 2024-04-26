@@ -108,42 +108,6 @@ namespace Language.Data
             return invoices;
         }
 
-        //Insert Invoice
-        public bool InsertInvoice(Invoice invoice)
-        {
-            bool result = false;
-            string query = "INSERT INTO invoice (invoice_id, user_id, invoice_number, invoice_date, total_price) " +
-                   "VALUES (@invoice_id, @user_id, @invoice_number, @invoice_date, @total_price)";
-
-            
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
-                {
-                    using (MySqlCommand command = new MySqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
-                        command.Parameters.AddWithValue("@user_id", invoice.user_id);
-                        command.Parameters.AddWithValue("@invoice_number", invoice.invoice_number);
-                        command.Parameters.AddWithValue("@invoice_date", invoice.invoice_date);
-                        command.Parameters.AddWithValue("@total_price", invoice.total_price);
-
-                        connection.Open();
-
-                        int rowsAffected = command.ExecuteNonQuery();
-
-                        if (rowsAffected > 0)
-                        {
-                            result = true;
-                        }
-
-                        connection.Close();
-                    }
-                }
-            
-            
-
-            return result;
-        }
-
         public bool CreateInvoice(Invoice invoice, Detail_Invoice detail_Invoice)
         {
             bool result = false;
@@ -156,6 +120,7 @@ namespace Language.Data
 
                 try
                 {
+                    //create invoice
                     MySqlCommand command1 = new MySqlCommand();
                     command1.Connection = connection;
                     command1.Transaction = transaction;
@@ -169,6 +134,7 @@ namespace Language.Data
                     command1.Parameters.AddWithValue("@invoice_date", invoice.invoice_date);
                     command1.Parameters.AddWithValue("@total_price", invoice.total_price);
 
+                    //add detail_invoice from detail_checkout 
                     MySqlCommand command2 = new MySqlCommand();
                     command2.Connection = connection;
                     command2.Transaction = transaction;
@@ -191,6 +157,7 @@ namespace Language.Data
                     command2.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
                     command2.Parameters.AddWithValue("@user_id", invoice.user_id);
 
+                    //update total_price
                     MySqlCommand command3 = new MySqlCommand();
                     command3.Connection = connection;
                     command3.Transaction = transaction;
