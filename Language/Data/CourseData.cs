@@ -1,5 +1,6 @@
 ﻿using Language.Models;
 using MySql.Data.MySqlClient;
+using Mysqlx.Crud;
 
 namespace Language.Data
 {
@@ -95,15 +96,17 @@ namespace Language.Data
 
             string query = @"
         SELECT
-            course_id,
-            category_id,
-            course_name,
-            course_description,
-            course_image,
-            price
+            c.course_id,
+            c.category_id,
+            c.course_name,
+            cat.category_name,
+            c.course_image,
+            c.price
         FROM
-            course
-        ORDER BY course_id";
+            course c
+        INNER JOIN
+            category cat ON c.category_id = cat.category_id";
+
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -119,8 +122,8 @@ namespace Language.Data
                             {
                                 course_id = Guid.Parse(reader["course_id"].ToString()),
                                 category_id = Guid.Parse(reader["category_id"].ToString()),
+                                category_name = reader["category_name"].ToString(),
                                 course_name = reader["course_name"].ToString(),
-                                course_description = reader["course_description"].ToString(),
                                 course_image = reader["course_image"].ToString(),
                                 price = int.Parse(reader["price"].ToString())
                             };
