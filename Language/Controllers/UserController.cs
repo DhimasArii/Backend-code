@@ -137,8 +137,9 @@ namespace Language.Controllers
 
                 var claims = new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.email),
-                    new Claim(ClaimTypes.Role, userRole.role)
+                    new Claim(ClaimTypes.Email, user.email),
+                    new Claim(ClaimTypes.Role, userRole.role),
+                    new Claim(ClaimTypes.NameIdentifier, user.user_id.ToString()),
                 };
 
                 var signingCredential = new SigningCredentials(
@@ -160,6 +161,24 @@ namespace Language.Controllers
                 return Ok(new LoginResponseDTO { Token = token });
 
             }
+        }
+
+        [Authorize]
+        [HttpGet("GetUserData")]
+        public IActionResult GetUserData()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var userClaims = identity.Claims;
+                return Ok(new
+                {
+                    Id = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
+                    Role = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value,
+                    Email = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Email)?.Value
+                });
+            }
+            return Unauthorized();
         }
 
 
