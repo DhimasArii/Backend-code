@@ -112,6 +112,9 @@ namespace Language.Data
         dc.checklist,
         ca.category_name,
         c.course_name,
+        c.course_description,
+        c.course_image,
+        c.price,
         cs.course_date
     FROM
         checkout co
@@ -161,6 +164,9 @@ namespace Language.Data
                                 checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
                                 category_name = reader["category_name"].ToString(),
                                 course_name = reader["course_name"].ToString(),
+                                course_description = reader["course_description"].ToString(),
+                                course_image = reader["course_image"].ToString(),
+                                price = int.Parse(reader["price"].ToString()),
                                 course_date = Convert.ToDateTime(reader["course_date"])
                             });
                         }
