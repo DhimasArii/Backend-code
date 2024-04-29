@@ -31,12 +31,12 @@ namespace Language.Controllers
             }
         }
 
-        [HttpGet("GetAllByCheckoutId")]
-        public IActionResult GetAllByCheckoutId(Guid checkout_id)
+        [HttpGet("GetAllByUserId")]
+        public IActionResult GetAllByCheckoutId(Guid user_id)
         {
             try
             {
-                List<Checkout> checkouts = _checkout.GetAllByCheckoutId(checkout_id);
+                List<Checkout> checkouts = _checkout.GetAllByUserId(user_id);
                 return Ok(checkouts);
             }
             catch (Exception ex)

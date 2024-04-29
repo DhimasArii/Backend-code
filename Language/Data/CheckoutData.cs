@@ -97,8 +97,8 @@ namespace Language.Data
 
 
 
-        //SelectAllByCheckoutId
-        public List<Checkout> GetAllByCheckoutId(Guid checkout_id)
+        //SelectAllByUserId
+        public List<Checkout> GetAllByUserId(Guid user_id)
         {
             List<Checkout> checkouts = new List<Checkout>();
 
@@ -127,14 +127,14 @@ namespace Language.Data
     JOIN
         category ca ON c.category_id = ca.category_id
     WHERE
-        co.checkout_id = @checkout_id";
+        co.user_id = @user_id";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@checkout_id", checkout_id);
+                    command.Parameters.AddWithValue("@user_id", user_id);
                     connection.Open();
 
                     using (MySqlDataReader reader = command.ExecuteReader())
