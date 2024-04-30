@@ -32,11 +32,11 @@ namespace Language.Controllers
         }
 
         [HttpGet("GetAllByUserId")]
-        public IActionResult GetAllByCheckoutId(Guid user_id)
+        public IActionResult GetAllByCheckoutId(Guid user_id,string sortOrder)
         {
             try
             {
-                List<Checkout> checkouts = _checkout.GetAllByUserId(user_id);
+                List<Checkout> checkouts = _checkout.GetAllByUserId(user_id,sortOrder);
                 return Ok(checkouts);
             }
             catch (Exception ex)
@@ -114,6 +114,45 @@ namespace Language.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpPost("BuyNow")]
+        public IActionResult BuyNow(BuyNowDTO request)
+        {
+            try
+            {
+                Checkout checkout = new Checkout
+                {
+                    checkout_id = Guid.NewGuid(),
+                    user_id = request.user_id,
+                    id_payment_method = request.id_payment_method,
+                    create_date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))
+                };
+
+                Detail_Checkout detailCheckout = new Detail_Checkout
+                {
+                    detail_checkout_id = Guid.NewGuid(),
+                    checkout_id = checkout.checkout_id,
+                    schedule_id = request.schedule_id,
+                    checklist = true 
+                };
+
+                bool success = _checkout.CreateBuyNow(checkout, detailCheckout);
+
+                if (success)
+                {
+                    return Ok(new { message = "Buy now successful" });
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Failed to create buy now" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
 
         [HttpPut("UpdateDetailCheckout")]
         public IActionResult Put(Guid detail_checkout_id, [FromBody] UpdateDetailCheckoutDTO updateDetailCheckoutDto)

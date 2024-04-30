@@ -98,7 +98,7 @@ namespace Language.Data
 
 
         //SelectAllByUserId
-        public List<Checkout> GetAllByUserId(Guid user_id)
+        public List<Checkout> GetAllByUserId(Guid user_id,string sortOrder)
         {
             List<Checkout> checkouts = new List<Checkout>();
 
@@ -107,6 +107,7 @@ namespace Language.Data
         co.checkout_id,
         co.user_id,
         co.id_payment_method,
+        co.create_date,
         dc.detail_checkout_id,
         dc.schedule_id,
         dc.checklist,
@@ -127,7 +128,9 @@ namespace Language.Data
     JOIN
         category ca ON c.category_id = ca.category_id
     WHERE
-        co.user_id = @user_id";
+        co.user_id = @user_id
+    ORDER BY 
+        co.create_date " + sortOrder + @", co.checkout_id";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -143,32 +146,35 @@ namespace Language.Data
 
                         while (reader.Read())
                         {
-                            if (currentCheckout == null)
+                            if (currentCheckout == null || currentCheckout.checkout_id != Guid.Parse(reader["checkout_id"].ToString()))
                             {
                                 currentCheckout = new Checkout
                                 {
                                     checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
                                     id_payment_method = Guid.Parse(reader["id_payment_method"].ToString()),
+                                    create_date = Convert.ToDateTime(reader["create_date"]),
                                     checkout_detail = new List<Detail_Checkout>()
                                 };
 
                                 checkouts.Add(currentCheckout);
                             }
-
-                            currentCheckout.checkout_detail.Add(new Detail_Checkout
+                            if (currentCheckout != null)
                             {
-                                detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
-                                checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
-                                schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
-                                checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
-                                category_name = reader["category_name"].ToString(),
-                                course_name = reader["course_name"].ToString(),
-                                course_description = reader["course_description"].ToString(),
-                                course_image = reader["course_image"].ToString(),
-                                price = int.Parse(reader["price"].ToString()),
-                                course_date = Convert.ToDateTime(reader["course_date"])
-                            });
+                                currentCheckout.checkout_detail.Add(new Detail_Checkout
+                                {
+                                    detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
+                                    checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
+                                    schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
+                                    checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
+                                    category_name = reader["category_name"].ToString(),
+                                    course_name = reader["course_name"].ToString(),
+                                    course_description = reader["course_description"].ToString(),
+                                    course_image = reader["course_image"].ToString(),
+                                    price = int.Parse(reader["price"].ToString()),
+                                    course_date = Convert.ToDateTime(reader["course_date"])
+                                });
+                            }
                         }
                     }
                 }
@@ -236,6 +242,69 @@ namespace Language.Data
             return result;
 
         }
+
+        //Create for BuyNow
+        public bool CreateBuyNow(Checkout checkout, Detail_Checkout detailCheckout)
+        {
+            bool result = false;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                MySqlTransaction transaction = connection.BeginTransaction();
+
+                try
+                {
+                    MySqlCommand command1 = new MySqlCommand();
+                    command1.Connection = connection;
+                    command1.Transaction = transaction;
+                    command1.Parameters.Clear();
+
+                    command1.CommandText = "INSERT INTO checkout (checkout_id, user_id, id_payment_method, create_date) VALUES (@checkout_id, @user_id, @id_payment_method, @create_date)";
+                    command1.Parameters.AddWithValue("@checkout_id", checkout.checkout_id);
+                    command1.Parameters.AddWithValue("@user_id", checkout.user_id);
+                    command1.Parameters.AddWithValue("@id_payment_method", checkout.id_payment_method);
+                    command1.Parameters.AddWithValue("@create_date", checkout.create_date);
+
+                    MySqlCommand command2 = new MySqlCommand();
+                    command2.Connection = connection;
+                    command2.Transaction = transaction;
+                    command2.Parameters.Clear();
+
+                    command2.CommandText = "INSERT INTO detail_checkout (detail_checkout_id, checkout_id, schedule_id, checklist) VALUES (@detail_checkout_id, @checkout_id, @schedule_id, @checklist)";
+                    command2.Parameters.AddWithValue("@detail_checkout_id", detailCheckout.detail_checkout_id);
+                    command2.Parameters.AddWithValue("@checkout_id", detailCheckout.checkout_id);
+                    command2.Parameters.AddWithValue("@schedule_id", detailCheckout.schedule_id);
+                    command2.Parameters.AddWithValue("@checklist", detailCheckout.checklist);
+
+                    var result1 = command1.ExecuteNonQuery();
+                    var result2 = command2.ExecuteNonQuery();
+
+                    if (result1 > 0 && result2 > 0)
+                    {
+                        transaction.Commit();
+                        result = true;
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Failed to create buy now", ex);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            return result;
+        }
+
 
         //Update detail_checkout
         public bool UpdateDetailCheckout(Guid detail_checkout_id, Detail_Checkout detailCheckout)
