@@ -47,5 +47,33 @@ namespace Language.Data
             return payments;
         }
 
+        //Insert Payment method
+        public bool CreatePaymentMethod(Payment payment)
+        {
+            bool result = false;
+            string query = @"INSERT INTO payment_method (id_payment_method, payment_name, payment_description, payment_icon, payment_status) 
+                                     VALUES (@id_payment_method, @payment_name, @payment_description, @payment_icon, @payment_status)";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@id_payment_method", payment.id_payment_method);
+                    command.Parameters.AddWithValue("@payment_name", payment.payment_name);
+                    command.Parameters.AddWithValue("@payment_description", payment.payment_description);
+                    command.Parameters.AddWithValue("@payment_icon", payment.payment_icon);
+                    command.Parameters.AddWithValue("@payment_status", payment.payment_status);
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0;
+
+                    connection.Close();
+                }
+            }
+
+            return result;
+        }
+
     }
 }

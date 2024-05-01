@@ -1,4 +1,6 @@
 ﻿using Language.Data;
+using Language.DTOs.PaymentMethod;
+using Language.DTOs.User;
 using Language.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +28,29 @@ namespace Language.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CreatePayment([FromBody] PaymentDTO paymentDto)
+        {
+            Payment payment = new Payment
+            {
+                id_payment_method = Guid.NewGuid(),
+                payment_name = paymentDto.payment_name,
+                payment_description = paymentDto.payment_description,
+                payment_status = paymentDto.payment_status,
+                payment_icon = paymentDto.payment_icon,
+            };
+            bool result = _payment.CreatePaymentMethod(payment);
+
+            if (result)
+            {
+                return Ok("Course created successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to create course.");
             }
         }
     }
