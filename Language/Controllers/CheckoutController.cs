@@ -124,7 +124,6 @@ namespace Language.Controllers
                 {
                     checkout_id = Guid.NewGuid(),
                     user_id = request.user_id,
-                    id_payment_method = request.id_payment_method,
                     create_date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))
                 };
 

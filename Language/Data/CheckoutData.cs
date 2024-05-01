@@ -261,10 +261,9 @@ namespace Language.Data
                     command1.Transaction = transaction;
                     command1.Parameters.Clear();
 
-                    command1.CommandText = "INSERT INTO checkout (checkout_id, user_id, id_payment_method, create_date) VALUES (@checkout_id, @user_id, @id_payment_method, @create_date)";
+                    command1.CommandText = "INSERT INTO checkout (checkout_id, user_id, create_date) VALUES (@checkout_id, @user_id, @create_date)";
                     command1.Parameters.AddWithValue("@checkout_id", checkout.checkout_id);
                     command1.Parameters.AddWithValue("@user_id", checkout.user_id);
-                    command1.Parameters.AddWithValue("@id_payment_method", checkout.id_payment_method);
                     command1.Parameters.AddWithValue("@create_date", checkout.create_date);
 
                     MySqlCommand command2 = new MySqlCommand();
