@@ -18,8 +18,7 @@ namespace Language.Data
         {
             List<Payment> payments = new List<Payment>();
 
-            string query = $"SELECT * FROM payment_method " +
-                $"WHERE course_id = @course_id";
+            string query = $"SELECT * FROM payment_method ";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -33,10 +32,11 @@ namespace Language.Data
                         {
                             Payment payment = new Payment
                             {
-                                id_payment_method = Guid.Parse(reader["schedule_id"].ToString()),
-                                payment_name = reader["course_id"].ToString(),
-                                payment_description = reader["course_id"].ToString(),
-                                payment_status = reader["course_id"].ToString(),
+                                id_payment_method = Guid.Parse(reader["id_payment_method"].ToString()),
+                                payment_name = reader["payment_name"].ToString(),
+                                payment_description = reader["payment_description"].ToString(),
+                                payment_icon = reader["payment_icon"].ToString(),
+                                payment_status = reader.GetBoolean(reader.GetOrdinal("payment_status")),
                             };
                             payments.Add(payment);
                         }
