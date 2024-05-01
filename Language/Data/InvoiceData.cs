@@ -71,7 +71,7 @@ namespace Language.Data
                                 {
                                     invoice_id = Guid.Parse(reader["invoice_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
-                                    invoice_number = int.Parse(reader["invoice_number"].ToString()),
+                                    invoice_number = reader["invoice_number"].ToString(),
                                     total_price = int.Parse(reader["total_price"].ToString()),
                                     invoice_date = Convert.ToDateTime(reader["invoice_date"]),
                                     detail_Invoices = new List<Detail_Invoice>()
@@ -108,7 +108,7 @@ namespace Language.Data
             return invoices;
         }
 
-        public bool CreateInvoice(Invoice invoice, Detail_Invoice detail_Invoice)
+        public bool CreateInvoice(Invoice invoice, Detail_Invoice detail_Invoice, Guid checkout_id)
         {
             bool result = false;
 
@@ -120,6 +120,11 @@ namespace Language.Data
 
                 try
                 {
+                    string invoiceNumber = GenerateInvoiceNumber();
+
+                    // Set the generated invoice number to the invoice object
+                    invoice.invoice_number = invoiceNumber;
+
                     //create invoice
                     MySqlCommand command1 = new MySqlCommand();
                     command1.Connection = connection;
@@ -151,11 +156,13 @@ namespace Language.Data
                                                 checkout co ON dc.checkout_id = co.checkout_id
                                             WHERE 
                                                 dc.checklist = TRUE
-                                                AND co.user_id = @user_id";
+                                                AND co.user_id = @user_id
+                                                AND dc.checkout_id = @checkout_id";
 
                     //command2.Parameters.AddWithValue("@detail_invoice_id", detail_Invoice.detail_invoice_id);
                     command2.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
                     command2.Parameters.AddWithValue("@user_id", invoice.user_id);
+                    command2.Parameters.AddWithValue("@checkout_id", checkout_id);
 
                     //update total_price
                     MySqlCommand command3 = new MySqlCommand();
@@ -204,6 +211,44 @@ namespace Language.Data
 
             return result;
         }
+
+        private string GenerateInvoiceNumber()
+        {
+            string prefix = "DLA";
+            int startingNumber = 1;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                MySqlCommand command = new MySqlCommand();
+                command.Connection = connection;
+                command.CommandText = "SELECT MAX(invoice_number) FROM invoice WHERE invoice_number LIKE 'DLA%'";
+
+                var maxInvoiceNumber = command.ExecuteScalar();
+                if (maxInvoiceNumber != null && maxInvoiceNumber != DBNull.Value)
+                {
+                    string lastInvoiceNumber = maxInvoiceNumber.ToString();
+                    int lastNumber;
+                    if (int.TryParse(lastInvoiceNumber.Substring(prefix.Length), out lastNumber))
+                    {
+                        startingNumber = lastNumber + 1;
+                    }
+                }
+                else
+                {
+                    // Jika tidak ada invoice yang ada, set invoice_number ke DLA00001
+                    return "DLA00001";
+                }
+            }
+
+            string formattedNumber = startingNumber.ToString().PadLeft(5, '0');
+            string invoiceNumber = prefix + formattedNumber;
+
+            return invoiceNumber;
+        }
+
+
     }
 }
 

@@ -36,6 +36,8 @@ namespace Language.Controllers
         {
             try
             {
+                
+
                 if (invoiceDto == null || invoiceDto.user_id == Guid.Empty)
                 {
                     return BadRequest("Invalid user data");
@@ -45,7 +47,7 @@ namespace Language.Controllers
                 {
                     invoice_id = Guid.NewGuid(),
                     user_id = invoiceDto.user_id,
-                    invoice_number = invoiceDto.invoice_number,
+                    //invoice_number = invoiceDto.invoice_number,
                     invoice_date = DateTime.Now,
                     total_price = 0
                 };
@@ -56,11 +58,11 @@ namespace Language.Controllers
                     invoice_id = invoices.invoice_id
                 };
 
-                bool result = _invoice.CreateInvoice(invoices, detail_Invoice);
+                bool result = _invoice.CreateInvoice(invoices, detail_Invoice,invoiceDto.checkout_id);
 
                 if (result)
                 {
-                    return StatusCode(201, invoiceDto);
+                    return StatusCode(201, "Data successfully inserted");
                 }
                 else
                 {
