@@ -30,13 +30,12 @@ namespace Language.Data
                         ca.category_name,
                         cs.course_date,
                         c.price AS course_price,
-                        COUNT(*) AS total_course,
-                        (
+                       (
                             SELECT COUNT(*)
-                            FROM course c
-                            JOIN course_schedule cs ON c.course_id = cs.course_id
-                            JOIN detail_invoice di ON cs.schedule_id = di.schedule_id
-                            WHERE di.detail_invoice_id = detail_invoice_id
+                            FROM course c2
+                            JOIN course_schedule cs2 ON c2.course_id = cs2.course_id
+                            JOIN detail_invoice di2 ON cs2.schedule_id = di2.schedule_id
+                            WHERE di2.invoice_id = i.invoice_id
                         ) AS total_course
                       
                     FROM
@@ -50,7 +49,9 @@ namespace Language.Data
                     JOIN
                         category ca ON c.category_id = ca.category_id
                     GROUP BY
-                        i.invoice_id, di.detail_invoice_id";
+                        i.invoice_id, di.detail_invoice_id
+                    ORDER BY
+                         i.invoice_number asc, i.invoice_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -73,6 +74,7 @@ namespace Language.Data
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
                                     invoice_number = reader["invoice_number"].ToString(),
                                     total_price = int.Parse(reader["total_price"].ToString()),
+                                    total_course = int.Parse(reader["total_course"].ToString()),
                                     invoice_date = Convert.ToDateTime(reader["invoice_date"]),
                                     detail_Invoices = new List<Detail_Invoice>()
                                 };
@@ -96,7 +98,7 @@ namespace Language.Data
                     }
                 }catch (Exception ex)
                     {
-                        throw new Exception("Failed to get data", ex);
+                        throw new Exception("Failed to get data" + ex.Message, ex);
                     }
                     finally
                     {

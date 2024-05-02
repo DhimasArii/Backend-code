@@ -57,7 +57,6 @@ namespace Language.Controllers
             {
                 checkout_id = Guid.NewGuid(),
                 user_id = checkoutDto.user_id,
-                id_payment_method = checkoutDto.id_payment_method,
 
             };
             

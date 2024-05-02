@@ -27,7 +27,6 @@ namespace Language.Data
         SELECT
         co.checkout_id,
         co.user_id,
-        co.id_payment_method,
         dc.detail_checkout_id,
         dc.schedule_id,
         dc.checklist,
@@ -36,13 +35,13 @@ namespace Language.Data
         cs.course_date
     FROM
         checkout co
-    JOIN
+    LEFT JOIN
         detail_checkout dc ON co.checkout_id = dc.checkout_id
-    JOIN
+    LEFT JOIN
         course_schedule cs ON dc.schedule_id = cs.schedule_id
-    JOIN
+    LEFT JOIN
         course c ON cs.course_id = c.course_id
-    JOIN
+    LEFT JOIN
         category ca ON c.category_id = ca.category_id
         ORDER BY
             co.checkout_id";
@@ -65,7 +64,6 @@ namespace Language.Data
                                 {
                                     checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
-                                    id_payment_method = Guid.Parse(reader["id_payment_method"].ToString()),
                                     checkout_detail = new List<Detail_Checkout>()
                                 };
 
@@ -74,16 +72,19 @@ namespace Language.Data
 
                             if (currentCheckout != null)
                             {
-                                currentCheckout.checkout_detail.Add(new Detail_Checkout
+                                if (reader["detail_checkout_id"] != DBNull.Value)
                                 {
-                                    detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
-                                    checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
-                                    schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
-                                    checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
-                                    category_name = reader["category_name"].ToString(),
-                                    course_name = reader["course_name"].ToString(),
-                                    course_date = Convert.ToDateTime(reader["course_date"])
-                                });
+                                    currentCheckout.checkout_detail.Add(new Detail_Checkout
+                                    {
+                                        detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
+                                        checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
+                                        schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
+                                        checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
+                                        category_name = reader["category_name"].ToString(),
+                                        course_name = reader["course_name"].ToString(),
+                                        course_date = Convert.ToDateTime(reader["course_date"])
+                                    });
+                                }
                             }
                         }
                     }
@@ -106,7 +107,6 @@ namespace Language.Data
     SELECT
         co.checkout_id,
         co.user_id,
-        co.id_payment_method,
         co.create_date,
         dc.detail_checkout_id,
         dc.schedule_id,
@@ -119,13 +119,13 @@ namespace Language.Data
         cs.course_date
     FROM
         checkout co
-    JOIN
+    LEFT JOIN
         detail_checkout dc ON co.checkout_id = dc.checkout_id
-    JOIN
+    LEFT JOIN
         course_schedule cs ON dc.schedule_id = cs.schedule_id
-    JOIN
+    LEFT JOIN
         course c ON cs.course_id = c.course_id
-    JOIN
+    LEFT JOIN
         category ca ON c.category_id = ca.category_id
     WHERE
         co.user_id = @user_id
@@ -152,7 +152,6 @@ namespace Language.Data
                                 {
                                     checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
-                                    id_payment_method = Guid.Parse(reader["id_payment_method"].ToString()),
                                     create_date = Convert.ToDateTime(reader["create_date"]),
                                     checkout_detail = new List<Detail_Checkout>()
                                 };
@@ -161,19 +160,22 @@ namespace Language.Data
                             }
                             if (currentCheckout != null)
                             {
-                                currentCheckout.checkout_detail.Add(new Detail_Checkout
+                                if (reader["detail_checkout_id"] != DBNull.Value)
                                 {
-                                    detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
-                                    checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
-                                    schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
-                                    checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
-                                    category_name = reader["category_name"].ToString(),
-                                    course_name = reader["course_name"].ToString(),
-                                    course_description = reader["course_description"].ToString(),
-                                    course_image = reader["course_image"].ToString(),
-                                    price = int.Parse(reader["price"].ToString()),
-                                    course_date = Convert.ToDateTime(reader["course_date"])
-                                });
+                                    currentCheckout.checkout_detail.Add(new Detail_Checkout
+                                    {
+                                        detail_checkout_id = Guid.Parse(reader["detail_checkout_id"].ToString()),
+                                        checkout_id = Guid.Parse(reader["checkout_id"].ToString()),
+                                        schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
+                                        checklist = reader.GetBoolean(reader.GetOrdinal("checklist")),
+                                        category_name = reader["category_name"].ToString(),
+                                        course_name = reader["course_name"].ToString(),
+                                        course_description = reader["course_description"].ToString(),
+                                        course_image = reader["course_image"].ToString(),
+                                        price = int.Parse(reader["price"].ToString()),
+                                        course_date = Convert.ToDateTime(reader["course_date"])
+                                    });
+                                }
                             }
                         }
                     }
