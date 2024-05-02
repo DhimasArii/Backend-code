@@ -31,6 +31,20 @@ namespace Language.Controllers
             }
         }
 
+        [HttpGet("GetAllByInvoiceId")]
+        public IActionResult Get(Guid invoice_id)
+        {
+            try
+            {
+                List<Invoice> invoices = _invoice.GetAllByInvoiceId(invoice_id);
+                return Ok(invoices);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpPost("CreateInvoice")]
         public async Task<IActionResult> CreateInvoice([FromBody] InvoiceDTO invoiceDto)
         {
@@ -48,6 +62,7 @@ namespace Language.Controllers
                     invoice_id = Guid.NewGuid(),
                     user_id = invoiceDto.user_id,
                     //invoice_number = invoiceDto.invoice_number,
+                    id_payment_method = invoiceDto.id_payment_method,
                     invoice_date = DateTime.Now,
                     total_price = 0
                 };
