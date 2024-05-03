@@ -32,11 +32,11 @@ namespace Language.Controllers
         }
 
         [HttpGet("GetAllByUserId")]
-        public IActionResult GetAllByCheckoutId(Guid user_id,string sortOrder)
+        public IActionResult GetAllByCheckoutId(Guid user_id)
         {
             try
             {
-                List<Checkout> checkouts = _checkout.GetAllByUserId(user_id,sortOrder);
+                List<Checkout> checkouts = _checkout.GetAllByUserId(user_id);
                 return Ok(checkouts);
             }
             catch (Exception ex)
@@ -57,6 +57,7 @@ namespace Language.Controllers
             {
                 checkout_id = Guid.NewGuid(),
                 user_id = checkoutDto.user_id,
+                create_date = DateTime.Now,
 
             };
             

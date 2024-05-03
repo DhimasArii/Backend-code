@@ -31,6 +31,24 @@ namespace Language.Controllers
             }
         }
 
+        [HttpGet("{schedule_id}")]
+        public ActionResult<List<Course_Schedule>> GetByScheduleId(Guid schedule_id)
+        {
+            try
+            {
+                List<Course_Schedule> schedules = _schedule.GetAllByScheduleId(schedule_id);
+                if (schedules.Count == 0)
+                {
+                    return NotFound(); // Jika tidak ada jadwal dengan ID yang diberikan
+                }
+                return Ok(schedules); // Mengirimkan data jadwal dalam response
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}"); // Tangani error internal server
+            }
+        }
+
         [HttpPost]
         public IActionResult CreateSchedule([FromBody] CourseShceduleDTO scheduleDto)
         {

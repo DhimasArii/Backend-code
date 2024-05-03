@@ -47,6 +47,49 @@ namespace Language.Data
             return schedules;
         }
 
+        //Select single schedule all info by schedule_id
+        public List<Course_Schedule> GetAllByScheduleId(Guid schedule_id)
+        {
+            List<Course_Schedule> schedules = new List<Course_Schedule>();
+
+            string query = @"
+        SELECT cs.schedule_id, cs.course_id, cs.course_date, ca.category_name, c.course_name,c.course_image, c.price
+        FROM course_schedule cs
+        JOIN course c ON cs.course_id = c.course_id
+        JOIN category ca ON c.category_id = ca.category_id
+        WHERE cs.schedule_id = @schedule_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@schedule_id", schedule_id);
+                    connection.Open();
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Course_Schedule schedule = new Course_Schedule
+                            {
+                                schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
+                                course_id = Guid.Parse(reader["course_id"].ToString()),
+                                course_date = DateTime.Parse(reader["course_date"].ToString()),
+                                category_name = reader["category_name"].ToString(),
+                                course_name = reader["course_name"].ToString(),
+                                course_image = reader["course_image"].ToString(),
+                                price = int.Parse(reader["price"].ToString())
+                            };
+                            schedules.Add(schedule);
+                        }
+                    }
+
+                }
+            }
+            return schedules;
+        }
+
+
         //Create Schedule
         public bool CreateSchedule(Course_Schedule schedule)
         {
@@ -139,6 +182,7 @@ namespace Language.Data
 
             return result;
         }
+
 
     }
 }

@@ -99,7 +99,7 @@ namespace Language.Data
 
 
         //SelectAllByUserId
-        public List<Checkout> GetAllByUserId(Guid user_id,string sortOrder)
+        public List<Checkout> GetAllByUserId(Guid user_id)
         {
             List<Checkout> checkouts = new List<Checkout>();
 
@@ -130,7 +130,7 @@ namespace Language.Data
     WHERE
         co.user_id = @user_id
     ORDER BY 
-        co.create_date " + sortOrder + @", co.checkout_id";
+         co.checkout_id";
 
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -190,8 +190,8 @@ namespace Language.Data
         public bool InsertCheckout(Checkout checkout)
         {
             bool result = false;
-            string query = $"INSERT INTO checkout (checkout_id, user_id) " +
-                     $"VALUES (@checkout_id, @user_id)";
+            string query = $"INSERT INTO checkout (checkout_id, user_id, create_date) " +
+                     $"VALUES (@checkout_id, @user_id,@create_date)";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -199,6 +199,7 @@ namespace Language.Data
                 {
                     command.Parameters.AddWithValue("@checkout_id", checkout.checkout_id);
                     command.Parameters.AddWithValue("@user_id", checkout.user_id);
+                    command.Parameters.AddWithValue("@create_date", checkout.create_date);
                     //command.Parameters.AddWithValue("@id_payment_method", checkout.id_payment_method);
 
                     command.Connection = connection;
