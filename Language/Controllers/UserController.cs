@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using Language.DTOs.Email;
 using Microsoft.AspNetCore.WebUtilities;
+using Language.DTOs.ForgetPassword;
 
 namespace Language.Controllers
 {
@@ -209,14 +210,14 @@ namespace Language.Controllers
         }
 
         [HttpPost("ForgetPassword")]
-        public async Task<IActionResult> ForgetPassword(string email)
+        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordDTO forgetPassword)
         {
             try
             {
-                if (string.IsNullOrEmpty(email))
+                if (forgetPassword == null || string.IsNullOrEmpty(forgetPassword.Email))
                     return BadRequest("Email is empty");
 
-                bool sendMail = await SendEmailForgetPassword(email);
+                bool sendMail = await SendEmailForgetPassword(forgetPassword.Email);
 
                 if (sendMail)
                 {
