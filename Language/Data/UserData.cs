@@ -103,7 +103,7 @@ namespace Language.Data
         //Insert
         //multiple sql command (with transaction)
 
-        public bool CreateUserAccount(User user, UserRole userRole)
+        public bool CreateUserAccount(User user, UserRole userRole, Checkout checkout)
         {
             bool result = false;
 
@@ -135,10 +135,21 @@ namespace Language.Data
                     command2.Parameters.AddWithValue("@userId", userRole.user_id);
                     command2.Parameters.AddWithValue("@role", userRole.role);
 
+                    MySqlCommand command3 = new MySqlCommand();
+                    command3.Connection = connection;
+                    command3.Transaction = transaction;
+                    command3.Parameters.Clear();
+
+                    command3.CommandText = "INSERT INTO checkout (checkout_id, user_id, create_date) VALUES (@checkout_id, @user_id, @create_date)";
+                    command3.Parameters.AddWithValue("@checkout_id", Guid.NewGuid().ToString()); // Generate checkout_id
+                    command3.Parameters.AddWithValue("@user_id", user.user_id);
+                    command3.Parameters.AddWithValue("@create_date", DateTime.Now);
+
                     var result1 = command1.ExecuteNonQuery();
                     var result2 = command2.ExecuteNonQuery();
+                    var result3 = command3.ExecuteNonQuery();
 
-                    if (result1 > 0 && result2 > 0)
+                    if (result1 > 0 && result2 > 0 && result3 > 0)
                     {
                         transaction.Commit();
                         result = true;

@@ -30,6 +30,20 @@ namespace Language.Controllers
             }
         }
 
+        [HttpGet("GetAllByUserId")] 
+        public IActionResult GetAllByUserId(Guid user_id)
+        {
+            try
+            {
+                List<My_Class> my_Classes = _myclass.GetAllByUserId(user_id);
+                return Ok(my_Classes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpGet("GetAllByMyClassId")]
 
         public IActionResult GetAllByMyClassId(Guid class_id) 
@@ -57,7 +71,7 @@ namespace Language.Controllers
             {
                 class_id = Guid.NewGuid(),
                 user_id = myClassDto.user_id,
-                course_id = myClassDto.course_id,
+                detail_invoice_id = myClassDto.detail_invoice_id,
             };
 
             try
@@ -89,7 +103,7 @@ namespace Language.Controllers
             My_Class myClass = new My_Class
             {
                 user_id = myClassDto.user_id,
-                course_id = myClassDto.course_id,
+                detail_invoice_id = myClassDto.detail_invoice_id,
             };
 
             bool result = _myclass.UpdateMyClass(class_id, myClass);

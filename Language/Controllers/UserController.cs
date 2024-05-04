@@ -86,7 +86,15 @@ namespace Language.Controllers
                     role = userDto.role
                 };
 
-                bool result = _userData.CreateUserAccount(user, userRole);
+                // Create checkout automatically
+                Checkout checkout = new Checkout
+                {
+                    checkout_id = Guid.NewGuid(),
+                    user_id = user.user_id,
+                    create_date = DateTime.Now
+                };
+
+                bool result = _userData.CreateUserAccount(user, userRole, checkout);
 
                 if (result)
                 {

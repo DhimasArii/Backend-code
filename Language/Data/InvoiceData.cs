@@ -406,7 +406,17 @@ namespace Language.Data
 
                     command4.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
 
+                    // Insert into my_class table
+                    MySqlCommand command5 = new MySqlCommand();
+                    command5.Connection = connection;
+                    command5.Transaction = transaction;
+                    command5.Parameters.Clear();
 
+                    command5.CommandText = @"INSERT INTO my_class (class_id, user_id, detail_invoice_id)
+                        VALUES (@class_id, @user_id, @detail_invoice_id)";
+                    command5.Parameters.AddWithValue("@class_id", Guid.NewGuid().ToString());
+                    command5.Parameters.AddWithValue("@user_id", invoice.user_id);
+                    command5.Parameters.AddWithValue("@detail_invoice_id", detail_Invoice.detail_invoice_id);
 
 
 
@@ -414,8 +424,10 @@ namespace Language.Data
                     var result2 = command2.ExecuteNonQuery();
                     var result3 = command3.ExecuteNonQuery();
                     var result4 = command4.ExecuteNonQuery();
+                    var result5 = command5.ExecuteNonQuery();
 
-                    if (result1 > 0 && result2 > 0 && result3 > 0 && result4 > 0)
+
+                    if (result1 > 0 && result2 > 0 && result3 > 0 && result4 > 0 && result5 > 0)
                     {
                         transaction.Commit();
                         result = true;
@@ -503,15 +515,26 @@ namespace Language.Data
 
                     command3.Parameters.AddWithValue("@invoice_id", invoice.invoice_id);
 
+                    // Insert into my_class table
+                    MySqlCommand command4 = new MySqlCommand();
+                    command4.Connection = connection;
+                    command4.Transaction = transaction;
+                    command4.Parameters.Clear();
 
+                    command4.CommandText = @"INSERT INTO my_class (class_id, user_id, detail_invoice_id)
+                        VALUES (@class_id, @user_id, @detail_invoice_id)";
+                    command4.Parameters.AddWithValue("@class_id", Guid.NewGuid().ToString());
+                    command4.Parameters.AddWithValue("@user_id", invoice.user_id);
+                    command4.Parameters.AddWithValue("@detail_invoice_id", detail_Invoice.detail_invoice_id);
 
 
 
                     var result1 = command1.ExecuteNonQuery();
                     var result2 = command2.ExecuteNonQuery();
                     var result3 = command3.ExecuteNonQuery();
+                    var result4 = command4.ExecuteNonQuery();
 
-                    if (result1 > 0 && result2 > 0 && result3 > 0)
+                    if (result1 > 0 && result2 > 0 && result3 > 0 && result4 > 0)
                     {
                         transaction.Commit();
                         result = true;
