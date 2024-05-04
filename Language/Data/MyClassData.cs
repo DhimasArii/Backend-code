@@ -23,15 +23,14 @@ namespace Language.Data
             string query = @"
         SELECT mc.class_id, mc.user_id, mc.detail_invoice_id,
                di.invoice_id, di.schedule_id,
-               c.course_name, c.course_description, c.course_image, c.price,
-               ca.category_name,
+               c.course_id,c.course_name, c.course_description, c.course_image, c.price,
+               ca.category_id,ca.category_name,
                cs.course_date
         FROM my_class mc
         INNER JOIN detail_invoice di ON mc.detail_invoice_id = di.detail_invoice_id
         INNER JOIN course_schedule cs ON di.schedule_id = cs.schedule_id
         INNER JOIN course c ON cs.course_id = c.course_id
-        INNER JOIN category ca ON c.category_id = ca.category_id
-        WHERE mc.class_id = @class_id";
+        INNER JOIN category ca ON c.category_id = ca.category_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -50,10 +49,8 @@ namespace Language.Data
                                 currentMyClass = new My_Class
                                 {
                                     class_id = Guid.Parse(reader["class_id"].ToString()),
-                                    detail_invoice_id = Guid.Parse(reader["detail_invoice_id"].ToString()),
-                                    schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
                                     user_id = Guid.Parse(reader["user_id"].ToString()),
-                                    total_price = Convert.ToInt32(reader["total_price"]),
+                                    detail_invoice_id = Guid.Parse(reader["detail_invoice_id"].ToString()),
                                     my_class = new List<Course>()
                                 };
 
@@ -64,8 +61,12 @@ namespace Language.Data
                             {
                                 currentMyClass.my_class.Add(new Course
                                 {
+                                    course_id = Guid.Parse(reader["course_id"].ToString()),
+                                    category_id = Guid.Parse(reader["category_id"].ToString()),
                                     course_name = reader["course_name"].ToString(),
-                                    course_price = Convert.ToInt32(reader["course_price"]),
+                                    course_description = reader["course_description"].ToString(),
+                                    course_image = reader["course_image"].ToString(),
+                                    price = int.Parse(reader["price"].ToString()),
                                     category_name = reader["category_name"].ToString(),
                                     course_date = Convert.ToDateTime(reader["course_date"])
                                 });
@@ -86,8 +87,8 @@ namespace Language.Data
             string query = @"
         SELECT mc.class_id, mc.user_id, mc.detail_invoice_id,
                di.invoice_id, di.schedule_id,
-               c.course_name, c.course_description, c.course_image, c.price,
-               ca.category_name,
+               c.course_id,c.course_name, c.course_description, c.course_image, c.price,
+               ca.category_id,ca.category_name,
                cs.course_date
         FROM my_class mc
         INNER JOIN detail_invoice di ON mc.detail_invoice_id = di.detail_invoice_id
@@ -107,25 +108,36 @@ namespace Language.Data
                     {
                         while (reader.Read())
                         {
-                            My_Class currentMyClass = new My_Class
-                            {
-                                class_id = Guid.Parse(reader["class_id"].ToString()),
-                                user_id = Guid.Parse(reader["user_id"].ToString()),
-                                detail_invoice_id = Guid.Parse(reader["detail_invoice_id"].ToString()),
-                                my_class = new List<Course>()
-                            };
+                            My_Class currentMyClass = myclass.FirstOrDefault(mc => mc.class_id == Guid.Parse(reader["class_id"].ToString()));
 
-                            currentMyClass.my_class.Add(new Course
+                            if (currentMyClass == null)
                             {
-                                course_name = reader["course_name"].ToString(),
-                                course_description = reader["course_description"].ToString(),
-                                course_image = reader["course_image"].ToString(),
-                                price = int.Parse(reader["price"].ToString()),
-                                category_name = reader["category_name"].ToString(),
-                                course_date = Convert.ToDateTime(reader["course_date"])
-                            });
+                                currentMyClass = new My_Class
+                                {
+                                    class_id = Guid.Parse(reader["class_id"].ToString()),
+                                    user_id = Guid.Parse(reader["user_id"].ToString()),
+                                    detail_invoice_id = Guid.Parse(reader["detail_invoice_id"].ToString()),
+                                    schedule_id = Guid.Parse(reader["schedule_id"].ToString()),
+                                    my_class = new List<Course>()
+                                };
 
-                            myclass.Add(currentMyClass);
+                                myclass.Add(currentMyClass);
+                            }
+
+                            if (currentMyClass != null)
+                            {
+                                currentMyClass.my_class.Add(new Course
+                                {
+                                    course_id = Guid.Parse(reader["course_id"].ToString()),
+                                    category_id = Guid.Parse(reader["category_id"].ToString()),
+                                    course_name = reader["course_name"].ToString(),
+                                    course_description = reader["course_description"].ToString(),
+                                    course_image = reader["course_image"].ToString(),
+                                    price = int.Parse(reader["price"].ToString()),
+                                    category_name = reader["category_name"].ToString(),
+                                    course_date = Convert.ToDateTime(reader["course_date"])
+                                });
+                            }
                         }
                     }
                 }

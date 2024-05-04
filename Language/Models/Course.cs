@@ -10,7 +10,6 @@
 
         public string course_image {  get; set;}
         public int price { get; set; }
-        public int course_price { get; internal set; }
         public DateTime course_date { get; internal set; }
     }
 }

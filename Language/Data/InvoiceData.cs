@@ -413,10 +413,21 @@ namespace Language.Data
                     command5.Parameters.Clear();
 
                     command5.CommandText = @"INSERT INTO my_class (class_id, user_id, detail_invoice_id)
-                        VALUES (@class_id, @user_id, @detail_invoice_id)";
-                    command5.Parameters.AddWithValue("@class_id", Guid.NewGuid().ToString());
+                                    SELECT 
+                                        UUID(),
+                                        @user_id,
+                                        di.detail_invoice_id
+                                    FROM 
+                                        detail_invoice di
+                                    JOIN
+                                        invoice i ON di.invoice_id = i.invoice_id
+                                    WHERE 
+                                        i.user_id = @user_id
+                                        AND i.invoice_id = @invoice_id"; // Added condition to match invoice_id
+
                     command5.Parameters.AddWithValue("@user_id", invoice.user_id);
-                    command5.Parameters.AddWithValue("@detail_invoice_id", detail_Invoice.detail_invoice_id);
+                    command5.Parameters.AddWithValue("@invoice_id", invoice.invoice_id); // Added invoice_id parameter
+
 
 
 
