@@ -1,8 +1,11 @@
-﻿namespace Language.DTOs.Course
+﻿
+namespace Language.DTOs.Course
 {
     public class CourseDTO
     {
-        public Guid category_id { get; set; }
+        internal Guid course_id;
+        internal Guid category_id;
+
         public string course_name { get; set; }
         public string course_description { get; set;}
         public string course_image { get; set;}

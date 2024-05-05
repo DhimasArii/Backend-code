@@ -11,5 +11,7 @@
         public string course_name { get; set; }
         public string course_image { get; set; }
         public int price { get; set; }
+        public List<Course_Schedule> schedules { get; set; }
+
     }
 }
