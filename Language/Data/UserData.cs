@@ -20,12 +20,15 @@ namespace Language.Data
         public List<User> GetAll()
         {
             List<User> users = new List<User>();
-            string query = "SELECT * FROM users";
+            string query = "SELECT u.user_id, u.email, u.passwords,u.IsActivated, r.role " +
+                           "FROM users u " +
+                           "JOIN user_role r ON u.user_id = r.user_id";
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    try { 
+                    try
+                    {
                         connection.Open();
 
                         using (MySqlDataReader reader = command.ExecuteReader())
@@ -37,7 +40,8 @@ namespace Language.Data
                                     user_id = Guid.Parse(reader["user_id"].ToString() ?? string.Empty),
                                     email = reader["email"].ToString() ?? string.Empty,
                                     passwords = reader["passwords"].ToString() ?? string.Empty,
-                                    
+                                    role = reader["role"].ToString() ?? string.Empty,
+                                    IsActivated = Convert.ToBoolean(reader["IsActivated"])
                                 });
                             }
                         }
@@ -46,16 +50,16 @@ namespace Language.Data
                     {
                         throw;
                     }
-                    finally { 
-                    connection.Close();
+                    finally
+                    {
+                        connection.Close();
                     }
                 }
-
             }
 
             return users;
-
         }
+
 
         //Select By Primary Key
         public User? GetById(Guid id)
@@ -307,35 +311,84 @@ namespace Language.Data
 
 
 
-            string query = $"UPDATE users SET email = @email, passwords = @passwords, address = @address, phone_number = @phone_number WHERE user_id = @user_id";
-
-
-
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
-                using (MySqlCommand command = new MySqlCommand())
+                connection.Open();
+
+            using (MySqlTransaction transaction = connection.BeginTransaction())
+            {
+                try
                 {
-                    command.Parameters.AddWithValue("@user_id", id);
-                    command.Parameters.AddWithValue("@email", user.email);
-                    command.Parameters.AddWithValue("@passwords", user.passwords);
-                    
+                    // Update data di tabel users
+                    MySqlCommand command1 = connection.CreateCommand();
+                    command1.Transaction = transaction;
+                        // Cek apakah ada permintaan untuk mengubah password
+                        if (!string.IsNullOrEmpty(user.passwords))
+                        {
+                            // Jika ada permintaan untuk mengubah password, tambahkan pernyataan UPDATE untuk password
+                            command1.CommandText = @"
+                        UPDATE users 
+                        SET email = @email, 
+                            passwords = @passwords, 
+                            IsActivated = @isActivated 
+                        WHERE user_id = @user_id";
+                            command1.Parameters.AddWithValue("@passwords", user.passwords);
+                        }
+                        else
+                        {
+                            // Jika tidak ada permintaan untuk mengubah password, abaikan pernyataan UPDATE untuk password
+                            command1.CommandText = @"
+                        UPDATE users 
+                        SET email = @email,
+                            IsActivated = @isActivated 
+                        WHERE user_id = @user_id";
+                        }
 
-                    command.Connection = connection;
-                    command.CommandText = query;
+                        // Tetap tambahkan parameter yang diperlukan
+                        command1.Parameters.AddWithValue("@user_id", id);
+                        command1.Parameters.AddWithValue("@email", user.email);
+                        command1.Parameters.AddWithValue("@isActivated", user.IsActivated);
 
-                    connection.Open();
 
-                    result = command.ExecuteNonQuery() > 0 ? true : false;
+                        // Update data di tabel user_role
+                        MySqlCommand command2 = connection.CreateCommand();
+                    command2.Transaction = transaction;
+                    command2.CommandText = @"
+                    UPDATE user_role 
+                    SET role = @role 
+                    WHERE user_id = @user_id";
+                    command2.Parameters.AddWithValue("@user_id", id);
+                    command2.Parameters.AddWithValue("@role", user.role);
 
-                    connection.Close();
+                        var result1 = command1.ExecuteNonQuery();
+                        var result2 = command2.ExecuteNonQuery();
+
+                        if (result1 > 0 && result2 > 0)
+                        {
+                            transaction.Commit();
+                            result = true;
+                        }
+                        else
+                        {
+                            transaction.Rollback();
+                        }
+                    }
+                catch (Exception ex)
+                {
+                    // Rollback transaksi jika terjadi kesalahan
+                    transaction.Rollback();
+                    Console.WriteLine("Error updating user and user_role:", ex.Message);
                 }
             }
 
-            return result;
+            connection.Close();
         }
 
-        // Delete
-        public bool Delete(Guid id)
+    return result;
+}
+
+    // Delete
+    public bool Delete(Guid id)
         {
             bool result = false;
 

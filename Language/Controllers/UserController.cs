@@ -15,6 +15,7 @@ using System.Text;
 using Language.DTOs.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using Language.DTOs.ForgetPassword;
+using Microsoft.AspNetCore.Identity;
 
 namespace Language.Controllers
 {
@@ -333,18 +334,31 @@ namespace Language.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(Guid id, [FromBody] UserDTO userDto) // Ubah parameter menjadi int
+        public IActionResult Put(Guid id, [FromBody] UserDTO userDto)
         {
+            string hashPassword;
 
             if (userDto == null)
+            {
                 return BadRequest("Data Should be Inputed");
+            }
 
-            User user = new User
+            if (!string.IsNullOrEmpty(userDto.passwords))
+            {
+                hashPassword = BCrypt.Net.BCrypt.HashPassword(userDto.passwords);
+            }
+            else
+            {
+                hashPassword = userDto.passwords;
+            }
+                User user = new User
             {
                 user_id = Guid.NewGuid(),
                 email = userDto.email,
-                passwords = userDto.passwords,
-                
+                passwords = hashPassword,
+                role = userDto.role,
+                IsActivated = userDto.isActivated,
+
             };
 
             bool result = _userData.Update(id, user);
