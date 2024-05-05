@@ -13,6 +13,48 @@ namespace Language.Data
             connectionString = _configuration.GetConnectionString("DefaultConnection");
         }
 
+        //selectAll
+        public List<Course_Schedule> GetAll()
+        {
+            List<Course_Schedule> schedules = new List<Course_Schedule>();
+
+            string query = @"SELECT * FROM course_schedule";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using(MySqlCommand command = connection.CreateCommand())
+                {
+                    try
+                    {
+                        connection.Open();
+
+                        using(MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                schedules.Add(new Course_Schedule
+                                {
+                                    schedule_id = Guid.Parse(reader["schedule_id"].ToString() ?? string.Empty),
+                                    course_id = Guid.Parse(reader["schedule_id"].ToString() ?? string.Empty),
+                                    course_date = (DateTime)reader["course_date"]
+                                });
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+
+            return schedules;
+        }
+
         //Select Schedule by course_id
         public List<Course_Schedule> GetScheduleByCourseId(Guid course_id)
         {
