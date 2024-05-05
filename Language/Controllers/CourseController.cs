@@ -81,22 +81,47 @@ namespace Language.Controllers
             }
         }
 
-        [HttpPost]
-        public IActionResult CreateCourse([FromBody] Course course)
+        [HttpPost("CreateCourse")]
+        [Authorize(Roles = "admin")]
+        public IActionResult CreateCourse([FromBody] CourseDTO courseDTO )
         {
-            bool result = _course.CreateCourse(course);
+            
+            if (courseDTO == null)
+            {
+                return BadRequest("Data Should be Inputed");
+            }
 
-            if (result)
+            CourseDTO course = new CourseDTO
             {
-                return Ok("Course created successfully.");
-            }
-            else
+                course_id = Guid.NewGuid(),
+                category_id = Guid.NewGuid(),
+                course_name = courseDTO.course_name,
+                course_image = courseDTO.course_image,
+                course_description = courseDTO.course_description,
+                price = courseDTO.price,
+            };
+
+            try
             {
-                return BadRequest("Failed to create course.");
+                bool result = _course.CreateCourse(course);
+                if (result)
+                {
+                    return StatusCode(201, course.course_id);
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to add detail checkout.");
+                }
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+
         }
 
         [HttpPut("{course_id}")]
+        [Authorize(Roles = "admin")]
         public IActionResult UpdateCourse(Guid course_id, [FromBody] CourseDTO courseDto)
         {
             if (courseDto == null)
@@ -107,7 +132,7 @@ namespace Language.Controllers
             Course courses = new Course
             {
                 course_id = Guid.NewGuid(),
-                category_id = courseDto.category_id,
+                category_id = Guid.NewGuid(),
                 course_name = courseDto.course_name,
                 course_description = courseDto.course_description,
                 course_image = courseDto.course_image,

@@ -17,6 +17,20 @@ namespace Language.Controllers
             _schedule = scheduleData;
         }
 
+        [HttpGet("GetAll")]
+        public IActionResult GetAll() 
+        {
+            try
+            {
+                List<Course_Schedule> schedules = _schedule.GetAll();
+                return Ok(schedules);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpGet("GetByCourseId")]
         public IActionResult GetByCourseId(Guid course_id)
         {

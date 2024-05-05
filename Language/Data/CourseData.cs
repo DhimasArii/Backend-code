@@ -1,4 +1,5 @@
-﻿using Language.Models;
+﻿using Language.DTOs.Course;
+using Language.Models;
 using MySql.Data.MySqlClient;
 using Mysqlx.Crud;
 
@@ -481,7 +482,10 @@ namespace Language.Data
             return result;
         }
 
-
+        internal bool CreateCourse(CourseDTO course)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
