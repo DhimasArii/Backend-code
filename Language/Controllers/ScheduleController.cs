@@ -63,26 +63,39 @@ namespace Language.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("CreateSchedule")]
         public IActionResult CreateSchedule([FromBody] CourseShceduleDTO scheduleDto)
         {
-            Course_Schedule course_Schedule = new Course_Schedule
+            if (scheduleDto == null)
             {
-                schedule_id = Guid.NewGuid(),
-                course_id = scheduleDto.course_id,
-                course_date = scheduleDto.course_date
-            };
-            bool result = _schedule.CreateSchedule(course_Schedule);
-
-            if (result)
-            {
-                return Ok("Course created successfully.");
+                return BadRequest("Invalid schedule data.");
             }
-            else
+
+            try
             {
-                return BadRequest("Failed to create course.");
+                Course_Schedule course_Schedule = new Course_Schedule
+                {
+                    schedule_id = Guid.NewGuid(),
+                    course_id = scheduleDto.course_id,
+                    course_date = scheduleDto.course_date
+                };
+                bool result = _schedule.CreateSchedule(course_Schedule);
+
+                if (result)
+                {
+                    return StatusCode(201, "Course created successfully.");
+                }
+                else
+                {
+                    return BadRequest("Failed to create course.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
 
         [HttpPut]
         public IActionResult Put(Guid schedule_id, [FromBody] CourseShceduleDTO scheduleDto)

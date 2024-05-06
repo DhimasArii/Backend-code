@@ -357,7 +357,6 @@ namespace Language.Controllers
                 email = userDto.email,
                 passwords = hashPassword,
                 role = userDto.role,
-                IsActivated = userDto.isActivated,
 
             };
 

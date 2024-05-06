@@ -102,6 +102,7 @@ namespace Language.Data
             c.course_name,
             cat.category_name,
             c.course_image,
+            c.course_description,
             c.price
         FROM
             course c
@@ -126,6 +127,7 @@ namespace Language.Data
                                 category_name = reader["category_name"].ToString(),
                                 course_name = reader["course_name"].ToString(),
                                 course_image = reader["course_image"].ToString(),
+                                course_description = reader["course_description"].ToString(),
                                 price = int.Parse(reader["price"].ToString())
                             };
 
@@ -403,7 +405,7 @@ namespace Language.Data
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                using (MySqlCommand command = new MySqlCommand())
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@course_id", course.course_id);
                     command.Parameters.AddWithValue("@category_id", course.category_id);

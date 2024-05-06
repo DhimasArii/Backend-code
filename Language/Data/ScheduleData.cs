@@ -18,11 +18,11 @@ namespace Language.Data
         {
             List<Course_Schedule> schedules = new List<Course_Schedule>();
 
-            string query = @"SELECT * FROM course_schedule";
+            string query = @"SELECT * FROM course_schedule;";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                using(MySqlCommand command = connection.CreateCommand())
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     try
                     {
@@ -137,30 +137,36 @@ namespace Language.Data
         {
             bool result = false;
             string query = $"INSERT INTO course_schedule (schedule_id, course_id, course_date) " +
-                     $"VALUES (@schedule_id, @course_id, @course_date)";
+                           $"VALUES (@schedule_id, @course_id, @course_date)";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                using (MySqlCommand command = new MySqlCommand())
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@schedule_id", schedule.schedule_id);
                     command.Parameters.AddWithValue("@course_id", schedule.course_id);
                     command.Parameters.AddWithValue("@course_date", schedule.course_date);
 
+                    try
+                    {
+                        connection.Open();
 
-                    command.Connection = connection;
-                    command.CommandText = query;
-
-                    connection.Open();
-
-                    result = command.ExecuteNonQuery() > 0 ? true : false;
-
-                    connection.Close();
+                        result = command.ExecuteNonQuery() > 0 ? true : false;
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
                 }
             }
-            return result;
 
+            return result;
         }
+
 
         //Update
         public bool Update(Guid schedule_id, Course_Schedule schedule)
