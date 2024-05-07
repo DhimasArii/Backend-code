@@ -2,6 +2,7 @@
 using Language.DTOs.CourseShcedule;
 using Language.DTOs.User;
 using Language.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Language.Controllers
@@ -64,6 +65,7 @@ namespace Language.Controllers
         }
 
         [HttpPost("CreateSchedule")]
+        [Authorize(Roles = "admin")]
         public IActionResult CreateSchedule([FromBody] CourseShceduleDTO scheduleDto)
         {
             if (scheduleDto == null)

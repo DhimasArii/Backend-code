@@ -35,7 +35,7 @@ namespace Language.Data
                                 schedules.Add(new Course_Schedule
                                 {
                                     schedule_id = Guid.Parse(reader["schedule_id"].ToString() ?? string.Empty),
-                                    course_id = Guid.Parse(reader["schedule_id"].ToString() ?? string.Empty),
+                                    course_id = Guid.Parse(reader["course_id"].ToString() ?? string.Empty),
                                     course_date = (DateTime)reader["course_date"]
                                 });
                             }
@@ -61,7 +61,7 @@ namespace Language.Data
             List<Course_Schedule> schedules = new List<Course_Schedule>();
 
             string query = $"SELECT * FROM course_schedule " +
-                $"WHERE course_id = @course_id";
+                $"WHERE course_id = @course_id ORDER BY course_date ASC";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
