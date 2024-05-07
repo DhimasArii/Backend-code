@@ -91,10 +91,10 @@ namespace Language.Controllers
                 return BadRequest("Data Should be Inputed");
             }
 
-            CourseDTO course = new CourseDTO
+            Course course = new Course
             {
                 course_id = Guid.NewGuid(),
-                category_id = Guid.NewGuid(),
+                category_id = courseDTO.category_id,
                 course_name = courseDTO.course_name,
                 course_image = courseDTO.course_image,
                 course_description = courseDTO.course_description,
@@ -110,7 +110,7 @@ namespace Language.Controllers
                 }
                 else
                 {
-                    return StatusCode(500, "Failed to add detail checkout.");
+                    return StatusCode(500, "Failed to add course.");
                 }
             }
             catch (Exception ex)
@@ -132,7 +132,7 @@ namespace Language.Controllers
             Course courses = new Course
             {
                 course_id = Guid.NewGuid(),
-                category_id = Guid.NewGuid(),
+                category_id = courseDto.category_id,
                 course_name = courseDto.course_name,
                 course_description = courseDto.course_description,
                 course_image = courseDto.course_image,
