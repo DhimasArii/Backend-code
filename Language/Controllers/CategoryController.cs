@@ -135,7 +135,23 @@ namespace Language.Controllers
             }
         }
 
-        
+        [HttpDelete("{category_id}")]
+        [Authorize(Roles = "admin")]
+        public IActionResult DeleteCategory(Guid category_id)
+        {
+            bool result = _course.DeleteCategory(category_id);
+
+            if (result)
+            {
+                return Ok("Category deleted successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to delete category.");
+            }
+        }
+
+
 
 
     }

@@ -151,7 +151,8 @@ namespace Language.Controllers
             }
         }
 
-        /*[HttpDelete("{course_id}")]
+        [HttpDelete("{course_id}")]
+        [Authorize(Roles = "admin")]
         public IActionResult DeleteCourse(Guid course_id)
         {
             bool result = _course.DeleteCourse(course_id);
@@ -164,7 +165,7 @@ namespace Language.Controllers
             {
                 return BadRequest("Failed to delete course.");
             }
-        }*/
+        }
 
 
 

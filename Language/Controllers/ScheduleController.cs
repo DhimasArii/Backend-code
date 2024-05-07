@@ -99,7 +99,8 @@ namespace Language.Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut("{schedule_id}")]
+        [Authorize(Roles = "admin")]
         public IActionResult Put(Guid schedule_id, [FromBody] CourseShceduleDTO scheduleDto)
         {
 
@@ -127,7 +128,8 @@ namespace Language.Controllers
 
         }
 
-        [HttpDelete]
+        [HttpDelete("{schedule_id}")]
+        [Authorize(Roles = "admin")]
         public IActionResult Delete(Guid schedule_id)
         {
             bool result = _schedule.Delete(schedule_id);

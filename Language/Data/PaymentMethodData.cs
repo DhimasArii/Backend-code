@@ -75,5 +75,67 @@ namespace Language.Data
             return result;
         }
 
+        // Update Payment method
+        public bool UpdatePaymentMethod(Guid id_payment_method, Payment payment)
+        {
+            bool result = false;
+            string query = @"UPDATE payment_method 
+                     SET payment_name = @payment_name, 
+                         payment_description = @payment_description, 
+                         payment_icon = @payment_icon, 
+                         payment_status = @payment_status 
+                     WHERE id_payment_method = @id_payment_method";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@payment_name", payment.payment_name);
+                    command.Parameters.AddWithValue("@payment_description", payment.payment_description);
+                    command.Parameters.AddWithValue("@payment_icon", payment.payment_icon);
+                    command.Parameters.AddWithValue("@payment_status", payment.payment_status);
+                    command.Parameters.AddWithValue("@id_payment_method", id_payment_method);
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0;
+
+                    connection.Close();
+                }
+            }
+
+            return result;
+        }
+
+        // Delete
+        public bool Delete(Guid id_payment_method)
+        {
+            bool result = false;
+
+            string query = $"DELETE FROM payment_method WHERE id_payment_method = @id_payment_method";
+
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.Clear();
+                    command.Parameters.AddWithValue("@id_payment_method", id_payment_method);
+
+                    command.Connection = connection;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+
+            return result;
+        }
+
+
     }
 }

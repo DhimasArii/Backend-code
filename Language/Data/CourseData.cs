@@ -396,6 +396,32 @@ namespace Language.Data
             return result;
         }
 
+        //Delete category
+        public bool DeleteCategory(Guid category_id)
+        {
+            bool result = false;
+            string query = $"DELETE FROM category WHERE category_id = @category_id";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand command = new MySqlCommand())
+                {
+                    command.Parameters.AddWithValue("@category_id", category_id);
+
+                    command.Connection = connection;
+                    command.CommandText = query;
+
+                    connection.Open();
+
+                    result = command.ExecuteNonQuery() > 0 ? true : false;
+
+                    connection.Close();
+                }
+            }
+            return result;
+        }
+
+
         //Insert course
         public bool CreateCourse(Course course)
         {
