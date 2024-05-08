@@ -9,5 +9,6 @@ namespace Language.DTOs.Course
         public string course_description { get; set;}
         public string course_image { get; set;}
         public int price { get; set; }
+        public bool course_status { get; set; }
     }
 }

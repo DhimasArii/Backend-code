@@ -99,6 +99,7 @@ namespace Language.Controllers
                 course_image = courseDTO.course_image,
                 course_description = courseDTO.course_description,
                 price = courseDTO.price,
+                course_status = courseDTO.course_status,
             };
 
             try
@@ -137,6 +138,7 @@ namespace Language.Controllers
                 course_description = courseDto.course_description,
                 course_image = courseDto.course_image,
                 price = courseDto.price,
+                course_status=courseDto.course_status,
             };
 
             bool result = _course.UpdateCourse(course_id, courses);

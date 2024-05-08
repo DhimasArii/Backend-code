@@ -7,6 +7,7 @@
         public string category_description { get; set;}
 
         public string category_image {  get; set;}
+        public bool category_status { get; set;}
 
         public List<Course> courses { get; set;}
     }

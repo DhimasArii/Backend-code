@@ -103,6 +103,7 @@ namespace Language.Data
             cat.category_name,
             c.course_image,
             c.course_description,
+            c.course_status,
             c.price
         FROM
             course c
@@ -128,7 +129,9 @@ namespace Language.Data
                                 course_name = reader["course_name"].ToString(),
                                 course_image = reader["course_image"].ToString(),
                                 course_description = reader["course_description"].ToString(),
-                                price = int.Parse(reader["price"].ToString())
+                                price = int.Parse(reader["price"].ToString()),
+
+                                course_status = reader.GetBoolean(reader.GetOrdinal("course_status")),
                             };
 
                             courses.Add(course);
@@ -150,7 +153,8 @@ namespace Language.Data
                     category_id,
                     category_name,
                     category_description,
-                    category_image
+                    category_image,
+                    category_status
                 FROM
                     category
                 ORDER BY category_id";
@@ -170,7 +174,8 @@ namespace Language.Data
                                 category_id = Guid.Parse(reader["category_id"].ToString()),
                                 category_name = reader["category_name"].ToString(),
                                 category_description = reader["category_description"].ToString(),
-                                category_image = reader["category_image"].ToString()
+                                category_image = reader["category_image"].ToString(),
+                                category_status = reader.GetBoolean(reader.GetOrdinal("category_status")),
                             };
 
                             categories.Add(category);
@@ -192,7 +197,8 @@ namespace Language.Data
                     category_id,
                     category_name,
                     category_description,
-                    category_image
+                    category_image,
+                    category_status
                 FROM
                     category
                 WHERE category_id = @category_id";
@@ -213,7 +219,8 @@ namespace Language.Data
                                 category_id = Guid.Parse(reader["category_id"].ToString()),
                                 category_name = reader["category_name"].ToString(),
                                 category_description = reader["category_description"].ToString(),
-                                category_image = reader["category_image"].ToString()
+                                category_image = reader["category_image"].ToString(),
+                                category_status = reader.GetBoolean(reader.GetOrdinal("category_status")),
                             };
 
                             categories.Add(category);
@@ -238,6 +245,7 @@ namespace Language.Data
                             c.course_description,
                             c.course_image,
                             c.price,
+                            c.course_status,
                             ca.category_name
                         FROM
                             course c
@@ -267,7 +275,9 @@ namespace Language.Data
                                 course_name = reader["course_name"].ToString(),
                                 course_description = reader["course_description"].ToString(),
                                 course_image = reader["course_image"].ToString(),
-                                price = int.Parse(reader["price"].ToString())
+                                price = int.Parse(reader["price"].ToString()),
+                                course_status = reader.GetBoolean(reader.GetOrdinal("course_status")),
+
                             };
 
                             courses.Add(course);
@@ -292,6 +302,7 @@ namespace Language.Data
                             c.course_description,
                             c.course_image,
                             c.price,
+                            c.course_status,
                             ca.category_name
                         FROM
                             course c
@@ -321,7 +332,8 @@ namespace Language.Data
                                 course_name = reader["course_name"].ToString(),
                                 course_description = reader["course_description"].ToString(),
                                 course_image = reader["course_image"].ToString(),
-                                price = int.Parse(reader["price"].ToString())
+                                price = int.Parse(reader["price"].ToString()),
+                                course_status = reader.GetBoolean(reader.GetOrdinal("course_status")),
                             };
 
                             courses.Add(course);
@@ -339,8 +351,8 @@ namespace Language.Data
         public bool CreateCategory(Category category)
         {
             bool result = false;
-            string query = $"INSERT INTO Category (category_id, category_name, category_description, category_image) " +
-                     $"VALUES (@category_id, @category_name, @category_description, @category_image)";
+            string query = $"INSERT INTO Category (category_id, category_name, category_description, category_image,category_status) " +
+                     $"VALUES (@category_id, @category_name, @category_description, @category_image,@category_status)";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -350,6 +362,7 @@ namespace Language.Data
                     command.Parameters.AddWithValue("@category_name", category.category_name);
                     command.Parameters.AddWithValue("@category_description", category.category_description);
                     command.Parameters.AddWithValue("@category_image", category.category_image);
+                    command.Parameters.AddWithValue("@category_status", category.category_status);
 
 
                     command.Connection = connection;
@@ -371,7 +384,7 @@ namespace Language.Data
         {
             bool result = false;
             string query = $"UPDATE Category SET category_name = @category_name, " +
-                           $"category_description = @category_description, category_image = @category_image " +
+                           $"category_description = @category_description, category_image = @category_image, category_status = @category_status " +
                            $"WHERE category_id = @category_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -382,6 +395,7 @@ namespace Language.Data
                     command.Parameters.AddWithValue("@category_description", category.category_description);
                     command.Parameters.AddWithValue("@category_image", category.category_image);
                     command.Parameters.AddWithValue("@category_id", category_id);
+                    command.Parameters.AddWithValue("@category_status", category.category_status);
 
                     command.Connection = connection;
                     command.CommandText = query;
@@ -426,8 +440,8 @@ namespace Language.Data
         public bool CreateCourse(Course course)
         {
             bool result = false;
-            string query = $"INSERT INTO course (course_id, category_id, course_name, course_description, course_image, price) " +
-                           $"VALUES (@course_id, @category_id, @course_name, @course_description, @course_image, @price)";
+            string query = $"INSERT INTO course (course_id, category_id, course_name, course_description, course_image, price ,course_status) " +
+                           $"VALUES (@course_id, @category_id, @course_name, @course_description, @course_image, @price, @course_status)";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -439,6 +453,7 @@ namespace Language.Data
                     command.Parameters.AddWithValue("@course_description", course.course_description);
                     command.Parameters.AddWithValue("@course_image", course.course_image);
                     command.Parameters.AddWithValue("@price", course.price);
+                    command.Parameters.AddWithValue("@course_status", course.course_status);
 
                     command.Connection = connection;
                     command.CommandText = query;
@@ -458,7 +473,7 @@ namespace Language.Data
         {
             bool result = false;
             string query = $"UPDATE course SET category_id = @category_id, course_name = @course_name, " +
-                           $"course_description = @course_description, course_image = @course_image, price = @price " +
+                           $"course_description = @course_description, course_image = @course_image, price = @price, course_status = @course_status " +
                            $"WHERE course_id = @course_id";
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -471,6 +486,7 @@ namespace Language.Data
                     command.Parameters.AddWithValue("@course_image", course.course_image);
                     command.Parameters.AddWithValue("@price", course.price);
                     command.Parameters.AddWithValue("@course_id", course_id);
+                    command.Parameters.AddWithValue("@course_status", course.course_status);
 
                     command.Connection = connection;
                     command.CommandText = query;

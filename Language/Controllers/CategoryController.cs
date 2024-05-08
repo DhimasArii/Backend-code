@@ -32,7 +32,8 @@ namespace Language.Controllers
                         category.category_id,
                         category.category_name,
                         category.category_description,
-                        category.category_image
+                        category.category_image,
+                        category.category_status,
                     };
                     categoryDetailsList.Add(categoryDetails);
                 }
@@ -58,7 +59,8 @@ namespace Language.Controllers
                         category.category_id,
                         category.category_name,
                         category.category_description,
-                        category.category_image
+                        category.category_image,
+                        category.category_status,
                     };
                     categoryDetailsList.Add(categoryDetails);
                 }
@@ -85,6 +87,7 @@ namespace Language.Controllers
                 category_name = categoryDto.category_name,
                 category_description = categoryDto.category_description,
                 category_image = categoryDto.category_image,
+                category_status = categoryDto.category_status
 
             };
 
@@ -121,6 +124,7 @@ namespace Language.Controllers
                 category_name= categoryDto.category_name,
                 category_description= categoryDto.category_description,
                 category_image= categoryDto.category_image,
+                category_status= categoryDto.category_status
             };
 
             bool result = _course.UpdateCategory(category_id, category);
