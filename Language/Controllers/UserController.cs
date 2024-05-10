@@ -257,7 +257,7 @@ namespace Language.Controllers
                 {"email", email }
             };
 
-            string callbackUrl = QueryHelpers.AddQueryString("http://localhost:5173/new-password", param);
+            string callbackUrl = QueryHelpers.AddQueryString("http://52.237.194.35:2027/new-password", param);
 
             string body = "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>";
 
@@ -318,7 +318,7 @@ namespace Language.Controllers
         {"email", user.email } // Tambahkan email sebagai parameter
     };
 
-            string callbackUrl = QueryHelpers.AddQueryString("https://localhost:7175/api/User/ActivateUser", param);
+            string callbackUrl = QueryHelpers.AddQueryString("http://52.237.194.35:2027/api/User/ActivateUser", param);
 
             EmailActivationModel model = new EmailActivationModel()
             {
